@@ -1,0 +1,78 @@
+import { createRouter, createWebHashHistory } from 'vue-router'
+
+const router = createRouter({
+  mode: "hash",
+  history: createWebHashHistory(import.meta.env.BASE_URL),//保证页面刷新时不会丢失路由信息。
+  routes: [
+    {
+      path: "/",
+      name: "默认路径",
+      redirect: "/login",
+    },
+    {
+      path: "/login",
+      name: "登录",
+      component: () => import('@/views/Login.vue'),
+    },
+    {
+      path:"/main",
+      name:"主界面",
+      redirect:"/chat",
+      component:() => import('@/views/Main.vue'),
+      children:[{
+        path:"/chat",
+        name:"聊天",
+        component: () => import('@/views/chat/Chat.vue'),
+      },{
+        path:"/contact",
+        name:"联系人",
+        redirect:"/contact/blank",
+        component: () => import('@/views/contact/Contact.vue'),
+        children:[{
+          path:"/contact/blank",
+          name:"空白页面",
+          component: () => import('@/views/contact/BlankPage.vue'),
+        },{
+          path:"/contact/search",
+          name:"搜索",
+          component: () => import('@/views/contact/Search.vue'),
+        },{
+          path:"/contact/createGroup",
+          name:"创建群聊",
+          component: () => import('@/views/contact/GroupEdit.vue'),
+        },{
+          path:"/contact/userDetail",
+          name:"用户详情",
+          component: () => import('@/views/contact/UserDetail.vue'),
+        },{
+          path:"/contact/groupDetail",
+          name:"群聊详情",
+          component: () => import('@/views/contact/GroupDetail.vue'),
+        },{
+          path:"/contact/contactNotice",
+          name:"新的朋友通知",
+          component: () => import('@/views/contact/ContactApply.vue'),
+        }]
+      },{
+        path:"/setting",
+        name:"设置",
+        redirect:"/setting/userInfo",
+        component: () => import('@/views/setting/Setting.vue'),
+        children:[{
+          path:"/setting/userInfo",
+          name:"个人信息",
+          component: () => import('@/views/setting/UserInfo.vue'),
+        },{
+          path:"/setting/fileManage",
+          name:"文件管理",
+          component: () => import('@/views/setting/FileManager.vue'),
+        },{
+          path:"/setting/about",
+          name:"关于",
+          component: () => import('@/views/setting/About.vue'),
+        }]
+      }]
+    }
+  ]
+})
+export default router
