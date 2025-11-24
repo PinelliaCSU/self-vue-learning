@@ -12,13 +12,13 @@
                 <div class="content" v-html="data.messageContent" v-if="data.messageType != 5"></div>
                 <div class="content" v-else>
                     <template v-if="data.fileType == 0">
-                        <ChatMessageImage :data="data"></ChatMessageImage>
+                        <ChatMessageImage :data="data" @click="showDetail"></ChatMessageImage>
                     </template>
                     <template v-if="data.fileType == 1">
-                        <chatMessageVideo :data="data"></chatMessageVideo>
+                        <chatMessageVideo :data="data" @click="showDetail"></chatMessageVideo>
                     </template>
                     <template v-if="data.fileType == 2">
-                        <chatMessageFile :data="data"></chatMessageFile>
+                        <chatMessageFile :data="data" @click="showDetail"></chatMessageFile>
                     </template>
                 </div>
             </template>
@@ -49,13 +49,13 @@
                 <div class="content" v-html="data.messageContent" v-if="data.messageType != 5"></div>
                 <div class="content" v-else>
                     <template v-if="data.fileType == 0">
-                        <ChatMessageImage :data="data"></ChatMessageImage>
+                        <ChatMessageImage :data="data" @click="showDetail"></ChatMessageImage>
                     </template>
                     <template v-if="data.fileType == 1">
-                        <chatMessageVideo :data="data"></chatMessageVideo>
+                        <chatMessageVideo :data="data" @click="showDetail"></chatMessageVideo>
                     </template>
                     <template v-if="data.fileType == 2">
-                        <chatMessageFile :data="data"></chatMessageFile>
+                        <chatMessageFile :data="data" @click="showDetail"></chatMessageFile>
                     </template>
                 </div>
             </template>
@@ -83,6 +83,16 @@ const props = defineProps({
         default:{}
     }
 })
+
+const emit = defineEmits(["showMediaDetail"])
+
+const showDetail =()=>{
+    if(props.data.status == 0){
+        return;
+    }
+    emit("showMediaDetail",props.data.messageId)
+}
+
 
 </script>
 

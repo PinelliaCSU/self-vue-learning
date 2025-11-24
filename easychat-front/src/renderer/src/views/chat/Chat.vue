@@ -11,7 +11,7 @@
       </div>
       <div class="chat-session-list">
         <template v-for="item in chatSessionList">
-          <ChatSession :data="item"  @click="chatSessionClickHandler(item)" @contextmenu.stop="onContextMenu(item, $event)" :currentSession="item.contactId == currentChatSession.contactId">
+          <ChatSession :data="item"  @click="chatSessionClickHandler(item)" @contextmenu.stop="onContextMenu(item, $event)" :currentSession="item.contactId == (currentChatSession.contactId || '')">
           </ChatSession>
         </template>
       </div>
@@ -30,7 +30,7 @@
         <div class="message-panel" id="message-panel">
           <div class="message-item" v-for="(data, index) in messageList" :id="'message' + data.messageId">
             <template v-if="data.messageType == 1 || data.messageType == 2 || data.messageType == 5">
-              <chatMessage :data="data" :currentChatSession="currentChatSession"></chatMessage>
+              <chatMessage :data="data" :currentChatSession="currentChatSession" @showMediaDetail="showMediaHandler"></chatMessage>
             </template>
           </div>
         </div>
@@ -65,7 +65,7 @@ const search = () => {
 const chatSessionList = ref([]);
 
 const onReceiveMessage = () => {
-  window.ipcRenderer.on('recieveMessage', (e, message) => {
+  window.ipcRenderer.on('receiveMessage', (e, message) => {
     console.log("收到消息：", message)
 
     if(message.messageType == 6){
@@ -283,6 +283,32 @@ const onContextMenu = (data, e) => {
     ]
   })
 }
+
+
+const showMediaHandler = (messageId)=>{
+  let showFileList = messageList.value.filter(item => item.messageType == 5);
+
+  showFileList = showFileList.map(item => {
+    return {
+      partType:"chat",
+      fileId:item.messageId,
+      fileType:item.fileType,
+      fileName:item.fileName,
+      fileSize:item.fileSize,
+      forceGet:false,
+    }
+  });
+  window.ipcRenderer.send('newWindow', {
+    windowId:"media",
+    title:"图片查看",
+    path:"/showMedia",
+    data:{
+      currentFileId:messageId,
+      fileList:showFileList,
+    }
+  })
+}
+
 </script>
 
 <style lang="scss" scoped>

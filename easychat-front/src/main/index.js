@@ -7,9 +7,11 @@ const NOODE_ENV = process.env.NODE_ENV;
 
 import { onLoginOrRegister , onLoginSuccess, winTitleOp ,onSetLocalStore , 
   onGetLocalStore , onLoadSessionData , onDelChatSession , onTopChatSession,
-  onLoadChatMessage , onAddLocalMessage ,onSetSessionSelect , onCreateCover
+  onLoadChatMessage , onAddLocalMessage ,onSetSessionSelect , onCreateCover,
+  onOpenNewWindow
 } from './ipc';
 import { on } from 'events';
+import { saveWindow } from './windowProxy';
 
 
 
@@ -39,6 +41,8 @@ function createWindow() {
       contextIsolation: false,
     }
   })
+
+  saveWindow("main",mainWindow);//对主窗口也进行集中管理
 
   if(NOODE_ENV === 'development'){
     mainWindow.webContents.openDevTools();
@@ -153,6 +157,7 @@ function createWindow() {
   onAddLocalMessage();
   onSetSessionSelect();
   onCreateCover();
+  onOpenNewWindow();
 }
 
 // This method will be called when Electron has finished
