@@ -8,14 +8,14 @@
         title="下一张" @click="next(1)"></div>
       <template v-if="fileList[0].fileType == 0">
         <el-divider direction="vertical" />
-        <div class="iconfont icon-enlarge" @click.stop="changesize(0.1)" @dblclick.stop title="放大"></div>
-        <div class="iconfont icon-narrow" @click="changesize(-0.1)" @dblclick.stop title="缩小"></div>
+        <div class="iconfont icon-enlarge" @click.stop="changeSize(0.1)" @dblclick.stop title="放大"></div>
+        <div class="iconfont icon-narrow" @click="changeSize(-0.1)" @dblclick.stop title="缩小"></div>
         <div :class="['iconfont', isOne2One ? 'icon-resize' : 'icon-source-size']" @dblclick.stop @click="resize"
           :title="isOne2One ? '图片适应大小' : '图片原始大小'"></div>
         <div class="iconfont icon-rotate" @dblclick.stop @click="rotate" title="旋转"></div>
         <el-divider direction="vertical" />
       </template>
-      <div class="iconfont icon-download" @dblclick.stop @click="onSave" title="另存为..."></div>
+      <div class="iconfont icon-download" @dblclick.stop @click="saveAs" title="另存为..."></div>
     </div>
     <div class="media-panel">
       <viewer :options="options" @inited="inited" :images="fileList"
@@ -48,7 +48,7 @@ import {component as Viewer} from 'v-viewer'
 const options = ref({
   inline:true,
   toolbar:false,
-  navabar:false,
+  navbar:false,
   button:false,
   title:false,
   zoomRatio:0.1,
@@ -57,10 +57,10 @@ const options = ref({
 
 const viewerMy = ref(null)
 const inited = (e)=>{
-  viewerMy.value = e.viewer
+  viewerMy.value = e
 }
 
-const changesize = (zoomRatio)=>{
+const changeSize = (zoomRatio)=>{
   if(!viewerMy.value){
     return
   }
@@ -76,7 +76,7 @@ const isOne2One = ref(false)
 const resize = ()=>{
   isOne2One.value = !isOne2One.value
   if(!isOne2One.value){
-    viewerMy.value.zoomTo(viewerMy.value.initialImageData.radio,true)
+    viewerMy.value.zoomTo(viewerMy.value.initialImageData.ratio,true)
   }else{
     viewerMy.value.zoomTo(1,true)
   }
@@ -86,12 +86,28 @@ const onWheel = (e)=>{
   if(fileList.value[0].fileType != 0){
     return
   }
+  
   if(e.deltaY < 0){
-    changesize(0.1)
+    changeSize(0.1)
   }else{
-    changesize(-0.1)
+    changeSize(-0.1)
   }
 }
+const player = ref()//组件ref
+const dPlayer = ref()//播放器实例
+const initPlayer = ()=>{
+  dPlayer.value = new DPlayer({
+    element: player.value,
+    theme:'#b7daff',
+    screenshot:true,
+    video:{
+      url:''
+    }
+  })
+}
+
+//路径相关
+const localServerPort = ref()
 
 const currentIndex = ref(0);
 const allFileList = ref([]);
@@ -99,10 +115,20 @@ const fileList = ref([{fileType:0,status:0}]);
 
 
 onMounted(() => {
+    initPlayer()
 
     window.addEventListener('wheel', onWheel);
     window.ipcRenderer.on("pageInitData",(e,data)=>{
-      allFileList.value = data.allFileList  
+      localServerPort.value = data.localServerPort
+      allFileList.value = data.fileList
+      
+      let index = 0;
+      if(data.currentFileId){
+        index = data.fileList.findIndex(item=>item.fileId == data.currentFileId)
+        index == -1? index = 0 : index = index
+      }
+      currentIndex.value = index;
+      getCurrentFile()
     })
 })
 
@@ -110,8 +136,55 @@ onUnmounted(() => {
    window.ipcRenderer.removeAllListeners('pageInitData')
    window.removeEventListener('wheel', onWheel);
 })
+
+const getCurrentFile = ()=>{
+
+  if(dPlayer.value){
+    dPlayer.value.pause()
+  }
+
+  const curFile = allFileList.value[currentIndex.value]
+  const url = getUrl(curFile);//获取文件的正确路径
+
+  fileList.value.splice(0,1,{
+    url:url,
+    fileType:curFile.fileType,
+    status:1,
+    fileSize:curFile.fileSize,
+    fileName:curFile.fileName,
+  })
+
+  if(curFile.fileType == 1){
+    dPlayer.value.switchVideo({
+      url:url
+    })
+  }
+}
+
+const next = (index)=>{
+  if(currentIndex.value + index < 0 || currentIndex.value + index >= allFileList.value.length){
+    return;
+  }
+  currentIndex.value = currentIndex.value + index;
+  getCurrentFile()
+}
+
+
+const getUrl = (curFile)=>{
+  return `http://127.0.0.1:${localServerPort.value}/file?fileId=${curFile.fileId}&partType=${curFile.partType}&fileType=${curFile.fileType}&forceGet=${curFile.forceGet}&${new Date().getTime()}`
+}
+
+
+const saveAs = ()=>{
+  const curFile = allFileList.value[currentIndex.value]
+  window.ipcRenderer.send('saveAs',{
+    partType:curFile.partType,
+    fileId:curFile.fileId,
+  })
+}
+
 const closeWin = () => {
-    
+    dPlayer.value.pause()
 }
 
 </script>
@@ -163,7 +236,7 @@ const closeWin = () => {
     justify-content: center;
     overflow: hidden;
     :deep(.viewer-backdrop) {
-        background: #ff5ff5;
+        background: #f5f5f5;
     }
 }
 

@@ -51,6 +51,9 @@ const userInfoStore = useUserInfoStore();//确保状态管理与组件生命周�
 import { useGlobalInfoStore } from "@/stores/GlobalInfoStore";
 const globalInfoStore = useGlobalInfoStore();
 
+import { useSysSettingStore } from "@/stores/SysSettingStore";
+const sysSettingStore = useSysSettingStore();
+
 const menuList = ref([
   {
     name:'chat',
@@ -93,7 +96,19 @@ const getLoginInfo = async()=>{
   window.ipcRenderer.send("getLocalStore",result.data.userId + "localServerPort")
 }
 
+const getSysSetting = async()=>{
+  let result = await proxy.Request({
+    url: proxy.Api.getSysSetting,
+  })
+  if(!result){
+    return;
+  }
+  sysSettingStore.setSetting(result.data);//从服务端取出系统设置并将其设置
+}
+
+
 onMounted(()=>{
+  getSysSetting();
   getLoginInfo();
   window.ipcRenderer.on("getLocalStoreCallback",(e,serverPort)=>{
     globalInfoStore.setInfo("localServerPort",serverPort);

@@ -17,7 +17,7 @@ const router = createRouter({
     {
       path: "/showMedia",
       name: "展示媒体信息",
-      component: () => import('@/views/show/showMedia.vue'),
+      component: () => import('@/views/show/ShowMedia.vue'),
     },
     {
       path:"/main",

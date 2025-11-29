@@ -64,7 +64,7 @@ const createWs = ()=>{
                 break;
             case 2: //聊天消息
             case 5: //图片，视频消息
-                if(message.sendUserId == store.getUserId() && message.contactType == 1){
+                if(message.sendUserId == store.getUserId()){ // 先把后面的&& message.contactType == 1去掉，疑似造成生成与自己的会话列表
                     break;
                 }//如果是自己发的消息
                 const sessionInfo = {}

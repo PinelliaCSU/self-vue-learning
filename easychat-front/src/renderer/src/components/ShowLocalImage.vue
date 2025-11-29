@@ -59,7 +59,7 @@ const serverUrl = computed(()=>{
 
 
 const showImageHandler = ()=>{
-  
+  console.log("showImageHandler",props.fileId)
 }
 
 </script>

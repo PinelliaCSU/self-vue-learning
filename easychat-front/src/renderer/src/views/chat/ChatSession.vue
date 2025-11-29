@@ -44,6 +44,7 @@ const props = defineProps({
     display: flex;
     border-bottom: 1px solid #ddd;
     
+
     .contact-tag {
         position: absolute;
         left: 0px;

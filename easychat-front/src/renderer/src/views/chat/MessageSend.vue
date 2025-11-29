@@ -55,7 +55,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, getCurrentInstance, nextTick } from "vue"
+import { ref, reactive, getCurrentInstance, nextTick, onMounted, onUnmounted } from "vue"
 const { proxy } = getCurrentInstance();
 import { getFileType } from "@/utils/Constants";
 import emojiList from '../../utils/Emoji';
@@ -63,6 +63,9 @@ import SearchAdd from '@/views/contact/SearchAdd.vue';
 
 import {useUserInfoStore} from '@/stores/UserInfoStore'
 const userInfoStore = useUserInfoStore();
+
+import { useSysSettingStore } from "@/stores/SysSettingStore";
+const sysSettingStore = useSysSettingStore();
 
 const props = defineProps({
     currentChatSession: {
@@ -82,11 +85,37 @@ const closePopover = ()=>{
    document.removeEventListener("click",hidePopover,false);
 }
 
-const uploadExceed = ()=>{
-
+//不可以超过设置的最大文件上传数量
+const uploadExceed = (files)=>{
+    checkFileLimit(files);
 }
-const pasteFile = (e)=>{
-   
+//粘贴文件
+
+
+const pasteFile = async(event)=>{
+   let items = event.clipboardData && event.clipboardData.items;
+
+   const fileData = {}
+
+   for(const item of items){
+      if(item.kind != 'file'){
+        break
+      }
+      const file = await item.getAsFile();
+      if(file.path != ''){
+        uploadFileDo(file);
+      }else{
+        const imageFile = new File([file],file.name);
+        let fileReader = new FileReader();
+        fileReader.onloadend = function(){
+           const byteArray = new Uint8Array(this.result);
+           fileData.byteArray = byteArray;
+           fileData.name = imageFile.name;
+           window.ipcRenderer.send("saveClipBoardFile",fileData);
+        }
+        fileReader.readAsArrayBuffer(imageFile);
+      }
+   } 
 }
 
 
@@ -98,7 +127,6 @@ const hidePopover = ()=>{
     showSendMsgPopover.value = false;
 }
 
-const fileLimit = ref(5);
 
 const sendMessage = (e)=>{
     if (e.shiftKey && e.key === 'Enter') {
@@ -130,7 +158,11 @@ const sendMessageDo = async(messageObj = {
     filePath,
     fileType
 },cleanMsgContent)=>{
-    //TODO 判断文件大小
+    // 判断文件大小
+    if(!checkFileSize(messageObj.fileType,messageObj.fileSize,messageObj.fileName)){
+        return;
+    }
+
     if(messageObj.fileSize === 0){
         proxy.confirm({
            message:`${messageObj.fileName}是一个空文件无法发送，请重新选择`,
@@ -222,7 +254,67 @@ const sendEmoji = (emoji) => {
     msgContent.value = (msgContent.value || '') + emoji;
     showEmojiPopover.value = false;
 }
+//检验文件大小
+const checkFileSize = (fileType,fileSize,fileName)=>{
+   const SIZE_MB = 1024 * 1024; // 1MB 的字节数
+   const settingArray = Object.values(sysSettingStore.getSetting());
+   const fileSizeNumber = settingArray[fileType];
+   if(fileSize > fileSizeNumber * SIZE_MB){
+      proxy.confirm({
+         message:`${fileName}文件过大，超出${fileSizeNumber}MB限制`,
+         showCancelButton:false,
+      })
+      return false;
+   }
+   return true;
+}
+//发送文件数量
+const fileLimit = 10;
+const checkFileLimit = (files)=>{
+   if(files.length > fileLimit){
+      proxy.confirm({
+         message:`一次最多只能上传${fileLimit}个文件`,
+         showCancelButton:false,
+      })
+      return false;
+   }
+   return true;
+}
 
+//拖入文件
+const dragOverHandler = (e) => {
+    e.preventDefault(); // 阻止默认行为，如表单提交
+}
+const dropHandler = (event) => {
+   event.preventDefault(); // 阻止默认行为，如表单提交
+   const files = event.dataTransfer.files;
+   if(!checkFileLimit(files)){
+      return;
+   }
+   for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      uploadFileDo(file);
+   }
+}
+
+
+onMounted(()=>{
+   window.ipcRenderer.on("saveClipBoardFileCallback",(e,file)=>{
+    const fileType = 0; 
+    sendMessageDo({
+        messageContent:'['+getFileType(fileType)+']',
+        messageType:5,
+        fileSize:file.size,
+        fileName:file.name,
+        filePath:file.path,
+        fileType:fileType,
+     },false)
+    })    
+})
+
+onUnmounted(()=>{
+   window.ipcRenderer.removeAllListeners("saveClipBoardFileCallback");
+})
 
 </script>
 

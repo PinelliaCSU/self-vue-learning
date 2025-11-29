@@ -11,7 +11,7 @@
       </div>
       <div class="chat-session-list">
         <template v-for="item in chatSessionList">
-          <ChatSession :data="item"  @click="chatSessionClickHandler(item)" @contextmenu.stop="onContextMenu(item, $event)" :currentSession="item.contactId == (currentChatSession.contactId || '')">
+          <ChatSession :data="item"  @click="chatSessionClickHandler(item)" @contextmenu.stop="onContextMenu(item, $event)" :currentSession="item.contactId == (currentChatSession?.contactId || '')">
           </ChatSession>
         </template>
       </div>

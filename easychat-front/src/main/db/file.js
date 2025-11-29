@@ -2,7 +2,7 @@ const fs = require('fs');
 const fse = require('fs-extra');
 const NODE_ENV = process.env.NODE_ENV;
 const path = require('path');
-const {app,ipcMain,shell} = require('electron');
+const {app,ipcMain,shell, dialog} = require('electron');
 const {exec} = require('child_process');
 const FormData = require('form-data');
 const axios = require('axios');
@@ -130,6 +130,12 @@ const getLocalFilePath = (partType,showCover,fileId)=>{
             let fileSuffix = messageInfo.fileName;
             fileSuffix = fileSuffix.substring(fileSuffix.lastIndexOf("."));//截取后缀名 
             localPath = localFolder + "/" + fileId + fileSuffix;
+        }else if(partType == "tmp"){//为剪切板文件处理
+            localFolder = localFolder + "/tmp/";
+            if(!fs.existsSync(localFolder)){
+                mkdirs(localFolder);
+            }
+            localPath = localFolder + "/" + fileId;
         }
         if(showCover){
             localPath = localPath + cover_img_suffix;
@@ -171,8 +177,38 @@ expressServer.get('/file',async(req,res)=>{
     let contentType = FILE_TYPE_CONTENT_TYPE[fileType] + fileSuffix;
     res.setHeader('Access-Control-Allow-Origin', '*')//允许跨域
     res.setHeader('Content-Type',contentType);
-    fs.createReadStream(localPath).pipe(res);
-    return;
+    if(showCover || fileType != 1){
+        fs.createReadStream(localPath).pipe(res);
+        return;
+    }//如果不是视频，直接返回流
+    //如果是视频，为了实现拖动功能，需要特殊处理
+    let state = fs.statSync(localPath);
+    let fileSize = state.size;
+    let range = req.headers.range;
+    if(range){
+        let parts = range.replace(/bytes=/, "").split("-");
+        let start = parseInt(parts[0], 10);
+        let end = parts[1] ? parseInt(parts[1], 10) : start + 999999;
+        end = end > fileSize - 1 ? fileSize - 1 : end;
+        let chunksize = (end - start) + 1;
+        let stream = fs.createReadStream(localPath, {start, end});
+        let head = {
+            'Content-Range': 'bytes ' + start + '-' + end + '/' + fileSize,
+            'Accept-Ranges': 'bytes',
+            'Content-Length': chunksize,
+            'Content-Type': "video/mp4",
+        }
+        res.writeHead(206, head);
+        stream.pipe(res);
+    }else{
+        let head = {
+            'Content-Length': fileSize,
+            'Content-Type': "video/mp4",
+        }
+        res.writeHead(200, head);
+        fs.createReadStream(localPath).pipe(res);
+    }
+   
 })
 //从服务器下载文件
 const downloadFile = (fileId,showCover,savePath,partType)=>{
@@ -237,9 +273,47 @@ const createCover = (filePath)=>{
     })
 }
 
+const saveAs = async({partType,fileId})=>{
+    let fileName = "";
+    if(partType == "avatar"){//头像
+        fileName = fileId + image_suffix;
+    }else if(partType == "chat"){//聊天文件
+        let messageInfo = await selectByMessageId(fileId);//找到文件
+        fileName = messageInfo.fileName; 
+    }
+
+    const localPath = await getLocalFilePath(partType,false,fileId);
+    const options = {
+        title: '保存文件',
+        defaultPath: fileName,
+    }
+    let result = await dialog.showSaveDialog(options);
+    if(result.canceled || result.filePath == ""){//取消{
+        return;
+    }
+    const filePath = result.filePath;
+    fse.copyFileSync(localPath,filePath);
+}
+
+
+const saveClipBoardFile = async(file)=>{
+    const fileSuffix = file.name.substring(file.name.lastIndexOf("."));//截取后缀名
+    const filePath = await getLocalFilePath("tmp",false,"tmp" + fileSuffix);
+    let byteArray = file.byteArray
+    const buffer = Buffer.from(byteArray);
+    fs.writeFileSync(filePath,buffer);
+    return {
+        size:byteArray.length,
+        name:file.name,
+        path:filePath,
+    }
+}
+
 export {
     saveFile2Local,
     startLocalServer,
     closeLocalServer,
-    createCover
+    createCover,
+    saveAs,
+    saveClipBoardFile,
 }

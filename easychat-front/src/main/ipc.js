@@ -9,7 +9,7 @@ import {initWs} from './wsClient'
 import  {addUserSetting} from './db/UserSettingModel'
 import { selectUserSessionList, delChatSession ,topChatSession, updateSessionInfo4Message ,readAll} from './db/ChatSessionUserModel';
 import { saveMessage, selectMessageList , updateMessage } from './db/ChatMessageModel';
-import { saveFile2Local , createCover } from './db/file';
+import { saveFile2Local , createCover , saveAs , saveClipBoardFile} from './db/file';
 import { saveWindow,getWindow,delWindow } from './windowProxy';
 
 
@@ -123,7 +123,12 @@ const onOpenNewWindow = ()=>{
     })
 }
 
-const openWindow = (windowId,title= "EasyChat",path,width=960,height=720,data)=>{
+const openWindow = (config) => {
+   const { windowId, title = "EasyChat", path, width = 960, height = 720, data } = config;//参数传递按这样写
+   
+   const localServerPort = store.getUserData("localServerPort");
+   data.localServerPort = localServerPort;
+
    let newWindow = getWindow(windowId);
    if(!newWindow){
         newWindow = new BrowserWindow({
@@ -174,6 +179,19 @@ const openWindow = (windowId,title= "EasyChat",path,width=960,height=720,data)=>
    }
 }
 
+const onSaveAs = ()=>{
+   ipcMain.on('saveAs', async(e,data) => {
+      saveAs(data)
+    })
+}
+
+const onSaveClipBoardFile = ()=>{
+   ipcMain.on('saveClipBoardFile', async(e,data) => {
+      const result = await saveClipBoardFile(data)
+      e.sender.send("saveClipBoardFileCallback",result)
+    })
+}
+
 export {
     onLoginOrRegister,
     onLoginSuccess,
@@ -188,4 +206,6 @@ export {
     onSetSessionSelect,
     onCreateCover,
     onOpenNewWindow,
+    onSaveAs,
+    onSaveClipBoardFile
 }

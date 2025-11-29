@@ -8,7 +8,8 @@ const NOODE_ENV = process.env.NODE_ENV;
 import { onLoginOrRegister , onLoginSuccess, winTitleOp ,onSetLocalStore , 
   onGetLocalStore , onLoadSessionData , onDelChatSession , onTopChatSession,
   onLoadChatMessage , onAddLocalMessage ,onSetSessionSelect , onCreateCover,
-  onOpenNewWindow
+  onOpenNewWindow , onSaveAs,
+  onSaveClipBoardFile
 } from './ipc';
 import { on } from 'events';
 import { saveWindow } from './windowProxy';
@@ -158,6 +159,8 @@ function createWindow() {
   onSetSessionSelect();
   onCreateCover();
   onOpenNewWindow();
+  onSaveAs();
+  onSaveClipBoardFile();
 }
 
 // This method will be called when Electron has finished
