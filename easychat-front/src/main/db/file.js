@@ -227,9 +227,7 @@ const downloadFile = (fileId,showCover,savePath,partType)=>{
             },config
         );
         const folder = savePath.substring(0,savePath.lastIndexOf("/"));
-        if(!fs.existsSync(folder)){
-            mkdirs(folder);
-        }
+        mkdirs(folder);
         const stream = fs.createWriteStream(savePath);
         if(response.headers['content-type'] == "application/json"){//如果是json，可能有问题
             let resourcesPath = getResourcesPath();

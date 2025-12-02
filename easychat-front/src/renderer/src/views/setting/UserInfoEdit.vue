@@ -34,7 +34,7 @@
 
 <script setup>
 import AreaSelect from "../../components/AreaSelect.vue";
-import { ref, reactive, getCurrentInstance, nextTick, computed } from "vue"
+import { ref, reactive, getCurrentInstance, nextTick, computed} from "vue"
 import AvatarUpload from "../../components/AvatarUpload.vue";
 const { proxy } = getCurrentInstance();
 

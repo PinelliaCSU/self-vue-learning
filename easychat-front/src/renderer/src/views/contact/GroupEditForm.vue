@@ -15,11 +15,11 @@
     </el-input>
   </el-form-item>
   <el-form-item label="封面" prop="avatarFile">
-    <AvatarUpload>
+    <AvatarUpload
     v-model="formData.avatarFile"
     ref="avatarUploadRef"
-    @coverFile="saveCover"
-    </AvatarUpload>
+    @coverFile="saveCover"></AvatarUpload>
+
   </el-form-item>
   <el-form-item label="加入权限" prop="joinType">
     <el-radio-group v-model="formData.joinType">
@@ -52,13 +52,17 @@ import { ref, reactive, getCurrentInstance, nextTick } from "vue"
 const { proxy } = getCurrentInstance();
 import {useContactStateStore} from '@/stores/ContactStateStore';
 const contactStateStore = useContactStateStore();
+import AvatarUpload from '@/components/AvatarUpload.vue';
+
+import { useAvatarInfoStore } from "../../stores/AvatarUpdateStore";
+const avatarInfoStore = useAvatarInfoStore();
 
 const formData = ref({});
 const formDataRef = ref();
 const rules = {
   groupName:[{required:true,message:'请输入群名称'}],
   joinType:[{required:true,message:'请选择入群方式'}],
-  avavtarFile:[{required:true,message:'请上传头像'}]
+  avatarFile:[{required:true,message:'请上传头像'}]
 };
 
 const emit = defineEmits(['editBack']);
@@ -70,6 +74,10 @@ const submit = async()=>{
      }
      let params = {};
      
+     if(params.groupId){
+      avatarInfoStore.setForceReload(params.groupId,false)
+     }
+
      Object.assign(params, formData.value);
      let result = await proxy.Request({
        url: proxy.Api.saveGroup,
@@ -88,18 +96,21 @@ const submit = async()=>{
      formDataRef.value.resetFields();
      contactStateStore.setContactReload('MY')
 
-     //TODO 重新加载头像
+     // 重新加载头像
+     if(params.groupId){
+       avatarInfoStore.setForceReload(params.groupId,true)
+     }
   });
 }
 
-const saveCover = ()=>{
-  //TODO 保存封面
+const saveCover = ({ avatarFile, coverFile }) => {
+  formData.value.avatarFile = avatarFile;
+  formData.value.avatarCover = coverFile;
 }
-
 const show = (data)=>{
-  formDataRef.resetFields();
+  formDataRef.value.resetFields();
   formData.value = Object.assign({},data);
-  formData.value.avatarFile = data.avatarFile;//?
+  formData.value.avatarFile = data.groupId;//?
 }
 defineExpose(
   {

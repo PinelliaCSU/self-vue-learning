@@ -14,19 +14,20 @@
                 </el-upload>
             </template>
         </div>
+        <div class="select-btn">
+            <el-upload name="file" :show-file-list="false" accept=".png,.PNG,.jpg,.JPG,.jpeg,.JPEG,.gif,.GIF,.bmp,.BMP"
+                :multiple="false" :http-request="uploadImage">
+                <el-button type="primary" size="small">选择头像</el-button>
+            </el-upload>
+        </div>
     </div>
-    <div class="select-btn">
-        <el-upload name="file" :show-file-list="false"
-                    accept=".png,.PNG,.jpg,.JPG,.jpeg,.JPEG,.gif,.GIF,.bmp,.BMP" :multiple="false"
-                    :http-request="uploadImage">
-            <el-button type="primary" size="small">选择头像</el-button>
-        </el-upload>
-    </div>
+
 </template>
 
 <script setup>
 import { ref, reactive, getCurrentInstance, nextTick, computed, onMounted, onUnmounted } from "vue"
 const { proxy } = getCurrentInstance();
+import ShowLocalImage from "@/components/ShowLocalImage.vue";
 
 const props = defineProps({
     modelValue: {
@@ -45,28 +46,26 @@ const uploadImage = async (file) => {
     window.ipcRenderer.send("createCover", file.path);
 }
 
-const preview = computed(()=>{
+const preview = computed(() => {
     return props.modelValue instanceof File;
 });
 
-onMounted(()=>{
-    window.ipcRenderer.on("createCoverCallback", (e,{avatarStream,coverStream}) => {
-        const coverBlob = new Blob([coverStream],{type:"image/png"});
+onMounted(() => {
+    window.ipcRenderer.on("createCoverCallback", (e, { avatarStream, coverStream }) => {
+        const coverBlob = new Blob([coverStream], { type: "image/png" });
         const coverFile = new File([coverBlob], "cover.jpg");
         let img = new FileReader();
         img.readAsDataURL(coverFile);
-        img.onload =({target})=>{
-            debugger
+        img.onload = ({ target }) => {
             localFile.value = target.result;
         }
-        const avatarBlob = new Blob([avatarStream],{type:"image/png"});
+        const avatarBlob = new Blob([avatarStream], { type: "image/png" });
         const avatarFile = new File([avatarBlob], "avatar.jpg");
-        emit("coverFile", {avatarFile,coverFile});
-        
+        emit("coverFile", { avatarFile, coverFile });
     })
 })
 
-onUnmounted(()=>{
+onUnmounted(() => {
     window.ipcRenderer.removeAllListeners("createCoverCallback");
 })
 </script>
