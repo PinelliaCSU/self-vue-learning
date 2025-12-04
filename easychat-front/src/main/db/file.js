@@ -255,6 +255,7 @@ const closeLocalServer = ()=>{
 
 const createCover = (filePath)=>{
     return new Promise(async(resolve,reject)=>{
+        console.log("filePath: ",filePath)
         let ffmpegPath = getFFmegPath();
         let avatarPath = await getLocalFilePath("avatar",false,store.getUserId() + "_temp");
         let command = `${ffmpegPath} -i "${filePath}" "${avatarPath}" -y`
@@ -265,8 +266,8 @@ const createCover = (filePath)=>{
         await execCommand(command);
 
         resolve({
-            avatarPath:fs.readFileSync(avatarPath),
-            coverPath:fs.readFileSync(coverPath)
+            avatarStream:fs.readFileSync(avatarPath),
+            coverStream:fs.readFileSync(coverPath)
         })
     })
 }

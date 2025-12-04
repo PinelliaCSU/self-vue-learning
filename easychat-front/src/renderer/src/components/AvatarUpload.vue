@@ -41,26 +41,37 @@ const localFile = ref(null);
 const emit = defineEmits(['coverFile']);
 
 
-const uploadImage = async (file) => {
-    file = file.file
+const uploadImage = async ({file}) => {
+    console.log("上传的文件对象:", file);
+    
+    if (!file || !file.path) {
+        console.error("文件对象或路径不存在");
+        return;
+    }
     window.ipcRenderer.send("createCover", file.path);
 }
 
 const preview = computed(() => {
+    console.log("modelValue:", props.modelValue);
     return props.modelValue instanceof File;
 });
 
 onMounted(() => {
     window.ipcRenderer.on("createCoverCallback", (e, { avatarStream, coverStream }) => {
+
+        console.log("avatarStream:", avatarStream);
+        console.log("coverStream:", coverStream);
+
         const coverBlob = new Blob([coverStream], { type: "image/png" });
-        const coverFile = new File([coverBlob], "cover.jpg");
+        const coverFile = new File([coverBlob], "thumbnail.jpg");
         let img = new FileReader();
         img.readAsDataURL(coverFile);
         img.onload = ({ target }) => {
+            console.log(target.result);
             localFile.value = target.result;
         }
         const avatarBlob = new Blob([avatarStream], { type: "image/png" });
-        const avatarFile = new File([avatarBlob], "avatar.jpg");
+        const avatarFile = new File([avatarBlob], "thumbnail2.jpg");
         emit("coverFile", { avatarFile, coverFile });
     })
 })

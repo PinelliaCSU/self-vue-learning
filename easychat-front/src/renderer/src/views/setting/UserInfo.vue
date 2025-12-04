@@ -70,7 +70,9 @@ const editBack = ()=>{
 }
 
 //退出登录
-
+const logout = async()=>{
+  
+}
 </script>
 
 <style lang="scss" scoped>

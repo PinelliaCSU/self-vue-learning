@@ -18,8 +18,8 @@
     <AvatarUpload
     v-model="formData.avatarFile"
     ref="avatarUploadRef"
-    @coverFile="saveCover"></AvatarUpload>
-
+    @coverFile="saveCover">
+  </AvatarUpload>
   </el-form-item>
   <el-form-item label="加入权限" prop="joinType">
     <el-radio-group v-model="formData.joinType">
@@ -52,7 +52,7 @@ import { ref, reactive, getCurrentInstance, nextTick } from "vue"
 const { proxy } = getCurrentInstance();
 import {useContactStateStore} from '@/stores/ContactStateStore';
 const contactStateStore = useContactStateStore();
-import AvatarUpload from '@/components/AvatarUpload.vue';
+import AvatarUpload from "../../components/AvatarUpload.vue";
 
 import { useAvatarInfoStore } from "../../stores/AvatarUpdateStore";
 const avatarInfoStore = useAvatarInfoStore();
@@ -104,14 +104,17 @@ const submit = async()=>{
 }
 
 const saveCover = ({ avatarFile, coverFile }) => {
+  console.log("群组头像上传",avatarFile,coverFile)
   formData.value.avatarFile = avatarFile;
   formData.value.avatarCover = coverFile;
 }
 const show = (data)=>{
   formDataRef.value.resetFields();
   formData.value = Object.assign({},data);
-  formData.value.avatarFile = data.groupId;//?
+  formData.value.avatarFile = data.groupId;
 }
+
+//向父组件暴露子组件的方法或属性
 defineExpose(
   {
     show,

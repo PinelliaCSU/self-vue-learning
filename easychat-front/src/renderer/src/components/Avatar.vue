@@ -76,7 +76,7 @@ const getUserInfo = async()=>{
         let result = await proxy.Request({
             url: proxy.Api.getContactInfo,
             params: {
-                userId: props.userId,
+                contactId: props.userId,
             },
             showLoading: false,
         })

@@ -49,8 +49,11 @@ const settingMenuList = ref([
   }
 ])
 
+const rightTitle = ref('')
+
 const jump = (data)=>{
     router.push(data.path)
+    rightTitle.value = data.name
 }
 
 </script>

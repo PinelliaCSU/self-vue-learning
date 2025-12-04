@@ -3,7 +3,7 @@
         <el-drawer v-model="showDrawer" modal-class="mask-style" :size="300" ref="drawerRef">
             <div class="group-panel-body">
                 <div class="member-list">
-                    <div class="member-item" v-for="item in memberlist">
+                    <div class="member-item" v-for="item in memberList">
                         <Avatar :userId="item.userId" :width="30" @closeDrawer="closeDrawerHandler"></Avatar>
                         <div class="nick-name" :title="item.contactName">{{ item.contactName }}</div>
                         <div class="owner-tag" v-if="item.userId == groupInfo.groupOwnerId">群主</div>
@@ -35,12 +35,18 @@
                 <a href="javascript:void(0)" class="leave-btn" @click="leaveGroup" v-else>退出群聊</a>
             </div>
         </el-drawer>
+        <UserSelect ref="userSelectRef" @callback="addOrRemoveUserCallback"></UserSelect>
     </div>
 </template>
 
 <script setup>
 import { ref, reactive, getCurrentInstance, nextTick } from "vue"
 const { proxy } = getCurrentInstance();
+
+import UserSelect from "./UserSelect.vue";
+import Avatar from "@/components/Avatar.vue";
+import AvatarBase from "@/components/AvatarBase.vue";
+
 
 const showDrawer = ref(false);
 const memberList = ref([]);
@@ -71,6 +77,57 @@ defineExpose(
         show,
     }
 )
+const drawerRef = ref();
+const closeDrawerHandler = () => {
+    drawerRef.value.close();
+}
+
+
+const userSelectRef = ref();
+const addUser = async() => {
+    let result = await proxy.Request({
+        url: proxy.Api.loadContact,
+        params: { 
+            contactType : 'USER'
+        },
+    })
+    if (!result) {
+        return;
+    }
+    const contactIds = memberList.value.map((item) => item['userId']);
+    let contactList = result.data
+    contactList.forEach((element)=>{
+        if(contactIds.includes(element.contactId)){
+            element.disabled = true;
+        }
+    });
+
+    userSelectRef.value.show({
+        contactList,
+        groupId: groupInfo.value.groupId,
+        onType: 1,
+    })
+}
+
+
+const removeUser = async() => {
+    let contactList = memberList.value.map((item) => item);
+    contactList.forEach((element)=>{
+        element.contactId = element.userId;
+    })
+    contactList.splice(0,1)
+    userSelectRef.value.show({
+        contactList,
+        groupId: groupInfo.value.groupId,
+        onType: 0,
+    })
+
+}
+
+const addOrRemoveUserCallback = ()=>{
+    showDrawer.value = false;
+}
+
 </script>
 
 <style lang="scss" scoped>

@@ -15,12 +15,14 @@ import { saveWindow,getWindow,delWindow } from './windowProxy';
 
 const onLoginOrRegister = (callback)=>{
     ipcMain.on('loginOrRegister', (e,isLogin) => {
+        console.log("收到登录或者注册的信息:",isLogin);
         callback(isLogin)//相当于在函数中调用另一个函数
     })
 }
 
 const onLoginSuccess = (callback)=>{
     ipcMain.on('openChat', (e,config) => {
+        console.log("收到登录成功的信息:",config);
         store.initUserId(config.userId)
         store.setUserData("token",config.token)
         // 增加用户配置
@@ -33,6 +35,7 @@ const onLoginSuccess = (callback)=>{
 
 const winTitleOp = (callback)=>{
     ipcMain.on('winTitleOp', (e,data) => {
+        console.log("收到窗口操作的信息:",data);
         callback(e,data)//相当于在函数中调用另一个函数
     })
 }
@@ -79,7 +82,6 @@ const onLoadChatMessage = ()=>{
 
 const onSetSessionSelect = ()=>{
     ipcMain.on('setSessionSelect', async(e,{contactId,sessionId}) => {
-
         if(sessionId){
             store.setUserData("currentSessionId",sessionId)
             readAll(contactId);
@@ -111,12 +113,35 @@ const onAddLocalMessage = ()=>{
 }
 
 const onCreateCover = ()=>{
-    ipcMain.on('createCover', async(e,localFilePath) => {
-       const stream = await createCover(localFilePath);
-       e.sender.send("createCoverCallback",stream)
-    })
-}
-
+    ipcMain.on('createCover', async(e, localFilePath) => {
+       try {
+           console.log("收到创建封面请求，文件路径:", localFilePath);
+           
+           const { avatarStream, coverStream } = await createCover(localFilePath);
+           console.log("avatarStream 大小:", avatarStream ? avatarStream.length : 0);
+           console.log("coverStream 大小:", coverStream ? coverStream.length : 0);
+           
+           // 检查数据是否有效
+           if (!avatarStream || !coverStream) {
+               throw new Error("生成的图像数据为空");
+           }
+           
+           // 直接发送包含两个 Buffer 的对象
+           e.sender.send("createCoverCallback", {
+               avatarStream: avatarStream,
+               coverStream: coverStream
+           });
+       } catch (error) {
+           console.error("创建封面出错:", error);
+           // 发送错误信息
+           e.sender.send("createCoverCallback", {
+               avatarStream: null,
+               coverStream: null,
+               error: error.message
+           });
+       }
+    });
+};
 const onOpenNewWindow = ()=>{
     ipcMain.on('newWindow', async(e,config) => {
        openWindow(config);

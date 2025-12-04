@@ -11,7 +11,7 @@ import { onLoginOrRegister , onLoginSuccess, winTitleOp ,onSetLocalStore ,
   onOpenNewWindow , onSaveAs,
   onSaveClipBoardFile
 } from './ipc';
-import { on } from 'events';
+
 import { saveWindow } from './windowProxy';
 
 
