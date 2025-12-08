@@ -98,9 +98,13 @@ const updateSessionInfo4Message = async(currentSessionId,{sessionId,contactName,
         paramData.push(contactName);
     }
     if(memberCount != null){
-        sql += `,membercount =?`;
+        sql += `,member_count =?`;
         paramData.push(memberCount);
     }
+    if(contactType != null){  
+        sql += `,contact_type =?`;  
+        paramData.push(contactType);  
+    }  
     //未选中当前session增加未读消息数
     if(currentSessionId != sessionId){
         sql += `,no_read_count = no_read_count +1`;

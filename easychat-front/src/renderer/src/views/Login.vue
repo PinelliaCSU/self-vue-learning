@@ -5,7 +5,7 @@
     <div v-if="showLoading" class="loading-panel">
       <img src="../assets/img/loading.gif"></img>
     </div>
-    <div class="login-from" v-else>
+    <div class="login-form" v-else>
       <div class="error-msg">{{ errorMsg }}</div>
 
       <el-form :model="formData" :rules="rules" ref="formDataRef" label-width="0px" @submit.prevent>
@@ -247,7 +247,7 @@ const clearVerify = () => {
     user-select: none;
   }
 
-  .login-from {
+  .login-form {
     width: 400px;
     padding: 40px;
     background: rgba(255, 255, 255, 0.9);

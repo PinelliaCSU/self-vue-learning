@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow, ipcMain, Menu ,Tray} from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/favicon.ico?asset'
-const NOODE_ENV = process.env.NODE_ENV;
+const NODE_ENV = process.env.NODE_ENV;
 
 
 import { onLoginOrRegister , onLoginSuccess, winTitleOp ,onSetLocalStore , 
@@ -45,7 +45,7 @@ function createWindow() {
 
   saveWindow("main",mainWindow);//对主窗口也进行集中管理
 
-  if(NOODE_ENV === 'development'){
+  if(NODE_ENV === 'development'){
     mainWindow.webContents.openDevTools();
   }
 

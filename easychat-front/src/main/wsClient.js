@@ -68,7 +68,7 @@ const createWs = ()=>{
             case 9: //好友加入群组
             case 11://退出群聊
             case 12://踢出群聊    
-                if(message.sendUserId == store.getUserId() && message.contactType == 1 && message.contactType == 0){
+                if(message.sendUserId == store.getUserId() && (message.contactType == 1 || message.contactType == 0)){
                     break;
                 }//如果是自己发的消息
                 const sessionInfo = {}

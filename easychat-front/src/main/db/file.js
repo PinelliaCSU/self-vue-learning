@@ -22,7 +22,7 @@ const ffprobePath = "/assets/ffprobe.exe";
 const ffmpegPath = "/assets/ffmpeg.exe";
 
 const getDomain = ()=>{
-    return NODE_ENV !== "development" ? store.getData()("prodDomain") : store.getData("devDomain");
+    return NODE_ENV !== "development" ? store.getData("prodDomain") : store.getData("devDomain");
 }
 
 

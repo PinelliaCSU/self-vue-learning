@@ -78,10 +78,10 @@ const menuList = ref([
   }
 ])
 
-const curretMenu = ref(menuList.value[0])
+const currentMenu = ref(menuList.value[0])
 
 const changeMenu = (item) => {
-  curretMenu.value = item;
+  currentMenu.value = item;
   router.push(item.path)
 }
 
@@ -158,7 +158,7 @@ onMounted(()=>{
         }
     
                 
-        .menu-button {
+        .menu-buttom {
           display: flex;
           flex-direction: column;
           justify-content: flex-end;

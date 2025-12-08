@@ -35,7 +35,7 @@ const getAreaInfo = (data)=>{
 
 const formatDate = (timestamp)=>{
     const timestampTime = moment(timestamp);
-    const days = Number.parseInt(moment().format("YYYYYMMDD")) - Number.parseInt(timestampTime.format("YYYYYMMDD"));
+    const days = Number.parseInt(moment().format("YYYYMMDD")) - Number.parseInt(timestampTime.format("YYYYYMMDD"));
     if(days == 0){
         return timestampTime.format("HH:mm");
     }else if(days == 1){
