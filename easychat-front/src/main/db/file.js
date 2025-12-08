@@ -88,10 +88,10 @@ const uploadFile = (messageId,savePath,coverPath)=>{
     const url = `${getDomain()}/api/chat/uploadFile`;//根据环境区分
     const token = store.getUserData("token");
     const config = {headers : {'Content-Type' : 'multipart/form-data',"token" : token}}
-    axios.post(url,formData,config).then((res)=>{
+    axios.post(url,formData,config).then((response)=>{
         
-    }).catch((err)=>{
-        console.log("文件上传失败",err);
+    }).catch((error)=>{
+        console.log("文件上传失败",error);
     })
 }
 

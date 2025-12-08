@@ -77,6 +77,7 @@ const dealWithApply = (applyId, contactType, status) => {
         url: proxy.Api.dealWithApply,
         params: {
           applyId,
+          contactType,
           status
         }
       })

@@ -75,7 +75,7 @@ const getGroupInfo = async () => {
         {
             url: proxy.Api.getGroupInfo,
             params: {
-                groupId: groupId.value
+                GroupId: groupId.value
             }
         }
     )
@@ -86,7 +86,7 @@ const getGroupInfo = async () => {
 }
 
 watch(
-    () => route.params.contactId,
+    () => route.query.contactId,
     (newVal, oldval) => {
         if (newVal) {
             groupId.value = newVal;

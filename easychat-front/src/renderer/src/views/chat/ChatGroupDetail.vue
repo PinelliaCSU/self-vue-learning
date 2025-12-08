@@ -47,6 +47,8 @@ import UserSelect from "./UserSelect.vue";
 import Avatar from "@/components/Avatar.vue";
 import AvatarBase from "@/components/AvatarBase.vue";
 
+import { useUserInfoStore } from '@/stores/UserInfoStore'
+const userInfoStore = useUserInfoStore();
 
 const showDrawer = ref(false);
 const memberList = ref([]);
@@ -55,10 +57,10 @@ const groupInfo = ref({});
 const show = async (groupId) => {
     let result = await proxy.Request({
         url: proxy.Api.getGroupInfo4Chat,
-        params: { groupId },
+        params: { GroupId : groupId },//前端先这样转一下
         showError:false,
         errorCallback: (response) => {
-            proxy.confrim({
+            proxy.confirm({
                 message: response.info,
                 showCancelButton: false,
             })
@@ -105,7 +107,7 @@ const addUser = async() => {
     userSelectRef.value.show({
         contactList,
         groupId: groupInfo.value.groupId,
-        onType: 1,
+        opType: 1,
     })
 }
 
@@ -119,7 +121,7 @@ const removeUser = async() => {
     userSelectRef.value.show({
         contactList,
         groupId: groupInfo.value.groupId,
-        onType: 0,
+        opType: 0,
     })
 
 }
@@ -128,10 +130,53 @@ const addOrRemoveUserCallback = ()=>{
     showDrawer.value = false;
 }
 
+const emit = defineEmits(['delChatSessionCallback']);
+
+const leaveGroup = () => {
+    proxy.confirm({
+        message: '确定退出该群吗？',
+        okfun: async () => {
+            let result = await proxy.Request({
+                url: proxy.Api.leaveGroup,
+                params: {
+                    groupId: groupInfo.value.groupId,
+                },
+            })
+            if (!result) {
+                return;
+            }
+            proxy.Message.success('退出成功')
+            drawerRef.value.close();
+            emit("delChatSessionCallback", groupInfo.value.groupId);
+        }
+    })
+}
+
+const dissolutionGroup = () => {
+    proxy.confirm({
+        message: `确定解散该群【${groupInfo.value.groupName}】吗？`,
+        okfun: async () => {
+            let result = await proxy.Request({
+                url: proxy.Api.dissolutionGroup,
+                params: {
+                    groupId: groupInfo.value.groupId,
+                },
+            })
+            if (!result) {
+                return;
+            }
+            proxy.Message.success('解散成功')
+            drawerRef.value.close();
+        }
+    })
+    
+}
+
+
 </script>
 
 <style lang="scss" scoped>
-group-panel {
+.group-panel {
     color: #000000;
 
     :deep(.mask-style) {
@@ -153,7 +198,7 @@ group-panel {
     }
 }
 
-group-panel-body {
+.group-panel-body {
     .member-list {
         display: flex;
         flex-wrap: wrap;

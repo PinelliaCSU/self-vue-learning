@@ -20,7 +20,7 @@ const props = defineProps({
 
 const dataMessage = computed(() => {
     const data = { ...props.data }
-    if (data.MessageType == 1) {
+    if (data.messageType == 1) {
         data.messageContent = '已经添加好友，以下是打招呼的内容'
     }
     return data

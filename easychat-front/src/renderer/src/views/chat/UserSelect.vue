@@ -1,42 +1,24 @@
 <template>
     <div>
-        <Dialog
-            :show="dialogConfig.show"
-            :title="dialogConfig.title"
-            :buttons="dialogConfig.buttons"
-            width="660px"
-            @close="dialogConfig.show = false"
-        >
-        <el-transfer
-        v-model="formData.selectContacts"
-        :titles="['全部', '已选']"
-        :format="{
-            noChecked: '${total}',
-            hasChecked: '${checked}/${total}'
-        }"
-        :data="datalist"
-        :props="{
+        <Dialog :show="dialogConfig.show" :title="dialogConfig.title" :buttons="dialogConfig.buttons" width="660px"
+            @close="dialogConfig.show = false">
+            <el-transfer v-model="formData.selectContacts" :titles="['全部', '已选']" :format="{
+                noChecked: '${total}',
+                hasChecked: '${checked}/${total}'
+            }" :data="dataList" :props="{
             key: 'contactId',
             label: 'contactName'
-        }"
-        filterable
-        :filter-method="search"
-        >
-        <template #default="{ option }">
-            <div class="select-item">
-                <div class="avatar">
-                    <AvatarBase
-                    :userId="option.contactId"
-                    :width="30"
-                    :borderRadius="5"
-                    :showDetail="false"
-                    >
-                    </AvatarBase>
-                </div>
-            <div class="nick-name">{{ option.contactName }}</div>
-            </div>
-        </template>
-        </el-transfer>
+        }" filterable :filter-method="search">
+                <template #default="{ option }">
+                    <div class="select-item">
+                        <div class="avatar">
+                            <AvatarBase :userId="option.contactId" :width="30" :borderRadius="5" :showDetail="false">
+                            </AvatarBase>
+                        </div>
+                        <div class="nick-name">{{ option.contactName }}</div>
+                    </div>
+                </template>
+            </el-transfer>
         </Dialog>
     </div>
 </template>
@@ -54,7 +36,7 @@ const dialogConfig = reactive({
     type: "primary",
     text: "确定",
     click: (e) => {
-      submitForm();
+      submitData();
     },
   },
  ],
@@ -70,14 +52,14 @@ const formData = ref({
 });
 
 
-const show = ({contactList,groupId,onType}) =>{
-    dialogConfig.value.title = onType === 0 ? '移除成员' : '添加成员';
-    dialogConfig.value.show = true;
+const show = ({contactList,groupId,opType}) =>{
+    dialogConfig.title = opType === 0 ? '移除成员' : '添加成员';
+    dialogConfig.show = true;
     dataList.value = contactList;
     formData.value = {
         selectContacts: [],
         groupId,
-        onType
+        opType
     }
 }
 
@@ -102,7 +84,7 @@ const submitData = async () => {
     if (!result) {
         return;
     }
-    dialogConfig.value.show = false;
+    dialogConfig.show = false;
     emit('callback');
 }
 
@@ -111,10 +93,10 @@ const submitData = async () => {
 <style lang="scss" scoped>
 .el-transfer {
     width: 100%;
-    display: block !important;
     display: flex;
     :deep(.el-transfer-panel) {
         width: 280px;
+        flex: 1;
     }
     :deep(.el-transfer-panel__item) {
         display: flex;

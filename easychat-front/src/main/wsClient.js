@@ -64,7 +64,11 @@ const createWs = ()=>{
                 break;
             case 2: //聊天消息
             case 5: //图片，视频消息
-                if(message.sendUserId == store.getUserId()){ // 先把后面的&& message.contactType == 1去掉，疑似造成生成与自己的会话列表
+            case 8: //解散群组
+            case 9: //好友加入群组
+            case 11://退出群聊
+            case 12://踢出群聊    
+                if(message.sendUserId == store.getUserId() && message.contactType == 1 && message.contactType == 0){
                     break;
                 }//如果是自己发的消息
                 const sessionInfo = {}
@@ -75,7 +79,15 @@ const createWs = ()=>{
                     if(message.contactType == 0 && messageType != 1){
                         sessionInfo.contactName = message.sendUserNickName;
                     }
+                     // 确保contactType字段被正确设置
+                    if(message.contactType !== undefined){
+                        sessionInfo.contactType = message.contactType;
+                    }
                     sessionInfo.lastReceiveMessage = message.sendTime;
+                }
+                //加入、退出、踢出群聊
+                if(messageType == 9 || messageType == 11 || messageType == 12){
+                    sessionInfo.memberCount = message.memberCount;
                 }
 
                 await saveOrUpdate4Message(store.getUserData("currentSessionId"),sessionInfo);

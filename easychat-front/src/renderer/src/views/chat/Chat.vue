@@ -57,7 +57,7 @@
       </div>
     </template>
   </Layout>
-  <ChatGroupDetail ref="chatGroupDetailRef"></ChatGroupDetail>
+  <ChatGroupDetail ref="chatGroupDetailRef" @delChatSessionCallback="delChatSession"></ChatGroupDetail>
 </template>
 
 <script setup>
@@ -75,7 +75,7 @@ import Blank from "../../components/Blank.vue";
 import chatMessageTime from "./ChatMessageTime.vue";
 import chatMessageSys from "./ChatMessageSys.vue";
 
-import chatGroupDetail from "./chatGroupDetail.vue";
+import ChatGroupDetail from "./ChatGroupDetail.vue";
 
 const searchKey = ref();
 const search = () => {
@@ -140,8 +140,11 @@ const sortChatSessionList = (dataList) => {
 }
 //删除会话
 const delChatSessionList = (contactId) => {
-  chatSessionList.value = chatSessionList.value.filter(item => item.contactId != contactId);
-
+  setTimeout(() => {
+    chatSessionList.value = chatSessionList.value.filter((item) => {
+      return item.contactId != contactId;
+    });
+  }, 100)//据说应该延迟100ms
 }
 
 //定义当前选中的会话
@@ -295,7 +298,7 @@ const setTop = (data) => {
 const delChatSession = (contactId,) => {
   delChatSessionList(contactId);
   currentChatSession.value = {};
-  //TODO 从当前列表中删除会话
+  //TODO 设置选中的会话
   window.ipcRenderer.send('delChatSession', contactId)
 }
 
