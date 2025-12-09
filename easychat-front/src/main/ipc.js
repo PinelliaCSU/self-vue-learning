@@ -6,7 +6,7 @@ const NOODE_ENV = process.env.NODE_ENV;
 import store from './store';
 
 import {initWs} from './wsClient'
-import  {addUserSetting} from './db/UserSettingModel'
+import  {addUserSetting , selectSettingInfo, updateContactNoReadCount} from './db/UserSettingModel'
 import { selectUserSessionList, delChatSession ,topChatSession, updateSessionInfo4Message ,readAll} from './db/ChatSessionUserModel';
 import { saveMessage, selectMessageList , updateMessage } from './db/ChatMessageModel';
 import { saveFile2Local , createCover , saveAs , saveClipBoardFile} from './db/file';
@@ -217,6 +217,26 @@ const onSaveClipBoardFile = ()=>{
     })
 }
 
+const onLoadContactApply = ()=>{
+   ipcMain.on('loadContactApply', async(e) => {
+        const userId = store.getUserId();
+        let result = await selectSettingInfo(userId);
+        let contactNoRead = 0;
+        if(result != null){
+           contactNoRead = result.contactNoRead;
+        }
+        e.sender.send("loadContactApplyCallback",contactNoRead)
+    })
+}
+
+const onUpdateContactNoReadCount = ()=>{
+    ipcMain.on('updateContactNoReadCount', async(e) => {
+       updateContactNoReadCount({userId : store.getUserId()})
+    })
+}
+
+
+
 export {
     onLoginOrRegister,
     onLoginSuccess,
@@ -232,5 +252,7 @@ export {
     onCreateCover,
     onOpenNewWindow,
     onSaveAs,
-    onSaveClipBoardFile
+    onSaveClipBoardFile,
+    onLoadContactApply,
+    onUpdateContactNoReadCount,
 }

@@ -79,7 +79,13 @@ const addUserSetting = async(userId,email)=>{
     store.setUserData("localFileFolder", localFileFolder);
 }
 
+const selectSettingInfo = (userId)=>{
+    let sql = `select * from user_setting where user_id =?`;
+    return queryOne(sql, [userId]);
+}
+
 export{
     updateContactNoReadCount,
-    addUserSetting
+    addUserSetting,
+    selectSettingInfo
 }

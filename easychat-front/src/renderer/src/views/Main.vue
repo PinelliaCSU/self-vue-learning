@@ -6,17 +6,17 @@
       </div>
       <div class="menu-list">
         <template v-for="item in menuList">
-          <div :class="['tab-item iconfont' , item.icon ,item.path == curretMenu.path ?'active' : '']" v-if="item.position == 'top'" 
+          <div :class="['tab-item iconfont' , item.icon ,item.path == currentMenu.path ?'active' : '']" v-if="item.position == 'top'" 
           @click="changeMenu(item)" >
-            <template v-if="item.name == 'chat'">
-              
+            <template v-if="item.name == 'chat' || item.name == 'contact'">
+              <Badge :count="messageCountStore.getCount(item.countKey)" :top="3" :left="15"></Badge>
             </template>
           </div>
         </template>
       </div>
       <div class="menu-list menu-buttom">
         <template v-for="item in menuList">
-          <div :class="['tab-item iconfont' , item.icon ,item.path == curretMenu.path ?'active' : '']" v-if="item.position == 'bottom'"
+          <div :class="['tab-item iconfont' , item.icon ,item.path == currentMenu.path ?'active' : '']" v-if="item.position == 'bottom'"
           @click="changeMenu(item)"></div>
         </template>
       </div>
@@ -53,6 +53,11 @@ const globalInfoStore = useGlobalInfoStore();
 
 import { useSysSettingStore } from "@/stores/SysSettingStore";
 const sysSettingStore = useSysSettingStore();
+
+import { useMessageCountStore } from '@/stores/MessageCountStore';
+import Badge from '../../components/Badge.vue';
+const messageCountStore = useMessageCountStore();
+
 
 const menuList = ref([
   {

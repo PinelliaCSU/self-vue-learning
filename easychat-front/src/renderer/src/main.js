@@ -24,6 +24,7 @@ import ShowLocalImage from '@/components/ShowLocalImage.vue'
 import UserBaseInfo from '@/components/UserBaseInfo.vue'
 import Dialog from '@/components/Dialog.vue'
 import Avatar from '@/components/Avatar.vue'
+import Badge from '@/components/Badge.vue'
 const app = createApp(App)
 
 app.use(ElementPlus)
@@ -37,7 +38,7 @@ app.component('UserBaseInfo',UserBaseInfo)
 app.component('Dialog',Dialog)
 app.component('Avatar',Avatar)
 app.component('AvatarUpload',AvatarUpload)
-
+app.component('Badge',Badge)
 
 // 全局属性
 app.config.globalProperties.Utils = Utils;

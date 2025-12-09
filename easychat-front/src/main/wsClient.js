@@ -2,7 +2,7 @@ import WebSocket from "ws"
 const NODE_ENV = process.env.NODE_ENV;
 
 import store from './store';
-import { saveOrUpdateChatSession4Batch ,saveOrUpdate4Message ,selectUserSessionByContactId} from "./db/ChatSessionUserModel";
+import { saveOrUpdateChatSession4Batch ,saveOrUpdate4Message ,selectUserSessionByContactId , updateGroupName} from "./db/ChatSessionUserModel";
 import { saveMessageBatch, updateMessage } from "./db/ChatMessageModel";
 import { updateContactNoReadCount } from "./db/UserSettingModel";
 
@@ -58,10 +58,23 @@ const createWs = ()=>{
                 await updateContactNoReadCount({userId: store.getUserId(), noReadCount: message.extendData.applyCount});
                 sender.send("receiveMessage", {messageType :message.messageType});
                 break;
+            case 4://好友申请
+                await updateContactNoReadCount({userId: store.getUserId(), noReadCount: 1});
+                sender.send("receiveMessage", {messageType :message.messageType});
+                break;
             case 6://文件上传完成
                 updateMessage({status:message.status},{messageId:message.messageId})
                 sender.send("receiveMessage", message);
                 break;
+            case 10://修改群昵称
+                updateGroupName(message.contactId,message.extendData);
+                sender.send("receiveMessage", message);
+            case 7://强制下线
+                sender.send("receiveMessage", message);
+                closeWs();
+                break;
+            case 1://添加好友成功
+            case 3://创建群聊成功
             case 2: //聊天消息
             case 5: //图片，视频消息
             case 8: //解散群组
@@ -78,10 +91,6 @@ const createWs = ()=>{
                     Object.assign(sessionInfo,message)
                     if(message.contactType == 0 && messageType != 1){
                         sessionInfo.contactName = message.sendUserNickName;
-                    }
-                     // 确保contactType字段被正确设置
-                    if(message.contactType !== undefined){
-                        sessionInfo.contactType = message.contactType;
                     }
                     sessionInfo.lastReceiveMessage = message.sendTime;
                 }

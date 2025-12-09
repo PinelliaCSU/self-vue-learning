@@ -9,14 +9,10 @@ import { onLoginOrRegister , onLoginSuccess, winTitleOp ,onSetLocalStore ,
   onGetLocalStore , onLoadSessionData , onDelChatSession , onTopChatSession,
   onLoadChatMessage , onAddLocalMessage ,onSetSessionSelect , onCreateCover,
   onOpenNewWindow , onSaveAs,
-  onSaveClipBoardFile
+  onSaveClipBoardFile ,onLoadContactApply , onUpdateContactNoReadCount
 } from './ipc';
 
 import { saveWindow } from './windowProxy';
-
-
-
-
 
 const login_width = 350
 const login_height = 600
@@ -161,6 +157,8 @@ function createWindow() {
   onOpenNewWindow();
   onSaveAs();
   onSaveClipBoardFile();
+  onLoadContactApply();
+  onUpdateContactNoReadCount();
 }
 
 // This method will be called when Electron has finished

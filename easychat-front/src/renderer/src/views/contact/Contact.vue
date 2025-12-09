@@ -17,6 +17,7 @@
             @click="partJump(sub)">
               <div :class="['iconfont' ,sub.icon]" :style="{background:sub.iconBgColor}"></div>
               <div class="text">{{ sub.name }}</div>
+              <Badge :count="messageCountStore.getCount(sub.countKey)" :top="3" :left="45"></Badge>
             </div>
             <template v-for="contact in item.contactData">
               <div :class="['part-item' ,contact[item.contactId] == route.query.contactId ? 'active' :'']"
@@ -55,6 +56,10 @@ const route = useRoute()
 
 import { useContactStateStore } from '@/stores/ContactStateStore';
 const contactStateStore = useContactStateStore();
+
+import { useMessageCountStore } from '@/stores/MessageCountStore';
+import Badge from '../../components/Badge.vue';
+const messageCountStore = useMessageCountStore();
 
 const searchKey = ref();
 const search = ()=>{
@@ -127,7 +132,11 @@ const partJump = (data)=>{
       rightTitle.value = null;
     }
 
-    //TODO 处理联系人好友申请，数量已读
+    // 处理联系人好友申请，数量已读
+    if(data.countKey){
+      messageCountStore.setCount(data.countKey,0,true);
+      window.ipcRenderer.send("updateContactNoReadCount");
+    }
     router.push(data.path)
 }
 

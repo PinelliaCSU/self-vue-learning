@@ -34,17 +34,17 @@
             <!--展示时间-->
             <template
               v-if="index > 1 && data.sendTime - messageList[index - 1].sendTime >= 300000 && (data.messageType == 2 || data.messageType == 5)">
-              <chatMessageTime :data="data"></chatMessageTime>
+              <ChatMessageTime :data="data"></ChatMessageTime>
             </template>
             <!--展示系统消息-->
             <template
               v-if="data.messageType == 3 || data.messageType == 1 || data.messageType == 9 || data.messageType == 8 || data.messageType == 11 || data.messageType == 12">
-              <chatMessageSys :data="data"></chatMessageSys>
+              <ChatMessageSys :data="data"></ChatMessageSys>
             </template>
             <!--消息-->
             <template v-if="data.messageType == 1 || data.messageType == 2 || data.messageType == 5">
-              <chatMessage :data="data" :currentChatSession="currentChatSession" @showMediaDetail="showMediaHandler">
-              </chatMessage>
+              <ChatMessage :data="data" :currentChatSession="currentChatSession" @showMediaDetail="showMediaHandler">
+              </ChatMessage>
             </template>
           </div>
         </div>
@@ -69,13 +69,16 @@ import ChatSession from "./ChatSession.vue";
 import ContextMenu from "@imengyu/vue3-context-menu"
 import "@imengyu/vue3-context-menu/lib/vue3-context-menu.css"
 
-import chatMessage from "./ChatMessage.vue";
+import ChatMessage from "./ChatMessage.vue";
 import Blank from "../../components/Blank.vue";
 
-import chatMessageTime from "./ChatMessageTime.vue";
-import chatMessageSys from "./ChatMessageSys.vue";
+import ChatMessageTime from "./ChatMessageTime.vue";
+import ChatMessageSys from "./ChatMessageSys.vue";
 
 import ChatGroupDetail from "./ChatGroupDetail.vue";
+
+import { useMessageCountStore } from "../../stores/MessageCountStore";
+const messageCountStore = useMessageCountStore();
 
 const searchKey = ref();
 const search = () => {
@@ -87,6 +90,12 @@ const chatSessionList = ref([]);
 const onReceiveMessage = () => {
   window.ipcRenderer.on('receiveMessage', (e, message) => {
     console.log("收到消息：", message)
+    //查询好友申请信息
+    if (message.messageType == 4) {
+      loadContactApply();
+      return;
+    }
+
 
     if (message.messageType == 6) {
       const localMessage = messageList.value.find(item => item.messageId == message.messageId);
@@ -105,7 +114,8 @@ const onReceiveMessage = () => {
     //重新排序
     sortChatSessionList(chatSessionList.value);
     if (message.sessionId != currentChatSession.value.sessionId) {
-      //TODO 未读消息气泡
+      // 未读消息气泡
+      messageCountStore.setCount('chatCount', 1, false);
     } else {
       Object.assign(currentChatSession.value, message.extendData);
       messageList.value.push(message);
@@ -118,9 +128,17 @@ const onReceiveMessage = () => {
 const onLoadSessionData = () => {
   window.ipcRenderer.on('loadSessionDataCallback', (e, dataList) => {
     // 会话排序
+
+
+    let noReadCount = 0;
+    dataList.forEach(item => {
+      if (item.noReadCount > 0) {
+        noReadCount += item.noReadCount;
+      }
+    })
+    messageCountStore.setCount('chatCount', noReadCount, true);
     sortChatSessionList(dataList);
     chatSessionList.value = dataList;
-    console.log("会话数据：", dataList)
   })
 }
 
@@ -130,7 +148,7 @@ const loadChatSession = () => {
 
 const sortChatSessionList = (dataList) => {
   dataList.sort((a, b) => {
-    const topTypeResult = a.topType - b.topType;
+    const topTypeResult = b["topType"] - a["topType"];
     if (topTypeResult == 0) {
       return b["lastReceiveTime"] - a["lastReceiveTime"];
     } else {
@@ -142,7 +160,7 @@ const sortChatSessionList = (dataList) => {
 const delChatSessionList = (contactId) => {
   setTimeout(() => {
     chatSessionList.value = chatSessionList.value.filter((item) => {
-      return item.contactId != contactId;
+      return item.contactId !== contactId;
     });
   }, 100)//据说应该延迟100ms
 }
@@ -164,7 +182,9 @@ const messageCountInfo = {
 const chatSessionClickHandler = (item) => {
   distanceBottom = 0;
   currentChatSession.value = Object.assign({}, item);
-  //TODO 消息记录数清空
+  // 消息记录数清空
+  messageCountStore.setCount('chatCount', -item.noReadCount, false);
+  item.noReadCount = 0;
   messageList.value = [];
   //分页加载消息
   messageCountInfo.totalPage = 1;
@@ -262,13 +282,29 @@ const gotoBottom = () => {
   })
 }
 
+const loadContactApply = ()=>{
+  window.ipcRenderer.send('loadContactApply')
+}
+
+const onLoadContactApply = ()=>{
+  window.ipcRenderer.on('loadContactApplyCallback', (e, contactNoRead)=>{
+    console.log("未读好友申请数量：", contactNoRead)
+    messageCountStore.setCount('contactApplyCount', contactNoRead,true);
+  })
+}
+
 
 onMounted(() => {
+  onLoadContactApply();
   onReceiveMessage();
   onLoadSessionData();
   loadChatSession();
   onLoadChatMessage();
   onAddLocalMessage();
+
+//获取未读好友申请数量
+  loadContactApply();
+
   nextTick(() => {
     const messagePanel = document.querySelector("#message-panel");
     messagePanel.addEventListener("scroll", (e) => {
@@ -280,12 +316,14 @@ onMounted(() => {
       }
     })
   })
+  setSessionSelect({});
 })
 onUnmounted(() => {
   window.ipcRenderer.removeAllListeners('receiveMessage');
   window.ipcRenderer.removeAllListeners('loadSessionDataCallback');
   window.ipcRenderer.removeAllListeners('loadChatMessage');
   window.ipcRenderer.removeAllListeners('addLocalMessage');
+  window.ipcRenderer.removeAllListeners('loadContactApplyCallback');
 })
 
 const setTop = (data) => {
