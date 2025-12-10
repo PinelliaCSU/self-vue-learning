@@ -43,8 +43,8 @@ const addChatSession = (sessionInfo)=>{
 
 const updateChatSession = (sessionInfo)=>{
     const paramData = {
-        contactId: sessionInfo.contactId,
         userId: store.getUserId(),
+        contactId: sessionInfo.contactId        
     }
 
     const updateInfo = Object.assign({}, sessionInfo);
@@ -67,8 +67,8 @@ const selectUserSessionList = ()=>{
 //更新数据库
 const delChatSession = (contactId)=>{
     const paramData = {
-        contactId: contactId,
         userId: store.getUserId(),
+        contactId: contactId
     }
 
     const sessionInfo = {
@@ -101,11 +101,6 @@ const updateSessionInfo4Message = async(currentSessionId,{sessionId,contactName,
         sql += `,member_count =?`;
         paramData.push(memberCount);
     }
-    if(contactType != null){  
-        sql += `,contact_type =?`;  
-        paramData.push(contactType);  
-    }  
-    //未选中当前session增加未读消息数
     if(currentSessionId != sessionId){
         sql += `,no_read_count = no_read_count +1`;
     }

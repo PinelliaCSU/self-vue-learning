@@ -177,7 +177,7 @@ const submit = async () => {
   if (isLogin.value) {
     userInfoStore.setInfo(result.data)
     localStorage.setItem('token', result.data.token)
-   
+
     router.push('/main') //页面跳转
 
     const screenWidth = window.screen.width
@@ -233,76 +233,88 @@ const clearVerify = () => {
 </script>
 
 <style lang="scss" scoped>
-.login-panel {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
+.email-panel {
   align-items: center;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  width: 100%;
+  display: flex;
+}
 
-  .title {
-    font-size: 32px;
-    color: #2c3e50;
-    margin: 80px 0 40px;
-    user-select: none;
-  }
+.email-panel .input {
+  flex: 1;
+}
 
-  .login-form {
-    width: 400px;
-    padding: 40px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+.email-panel .icon-down {
+  margin-left: 3px;
+  width: 16px;
+  cursor: pointer;
+  border: none;
+}
 
-    .error-msg {
-      color: #ff4444;
-      margin-bottom: 20px;
-      min-height: 22px;
-    }
+.error-msg {
+  line-height: 30px;
+  height: 30px;
+  color: #fb7373;
+}
 
-    .el-form-item {
-      margin-bottom: 28px;
-
-      :deep(.el-input__wrapper) {
-        padding: 0 15px;
-        border-radius: 8px;
-
-        .iconfont {
-          color: #a0a0a0;
-          margin-right: 8px;
-        }
-      }
-    }
-
-    .login-btn {
-      width: 100%;
-      margin-top: 10px;
-      font-size: 16px;
-      letter-spacing: 2px;
-      border-radius: 8px;
-    }
-
-    .bottom-link {
-      text-align: center;
-      margin-top: 20px;
-
-      .a-link {
-        color: #909399;
-        cursor: pointer;
-        transition: color 0.3s;
-
-        &:hover {
-          color: #409eff;
-        }
-      }
-    }
+.login-form {
+  padding: 0px 15px 29px 15px;
+  
+  :deep(.el-form-item__wrapper) {
+    box-shadow: none;
+    border-radius: none;
   }
 }
 
-@media (max-width: 768px) {
-  .login-from {
-    width: 90% !important;
-    padding: 20px !important;
-  }
+.el-form-item {
+  border-bottom: 1 px solid #ddd;
+}
+
+.check-code-panel {
+  display: flex;
+}
+
+.check-code-panel .check-code {
+  cursor: pointer;
+  width: 120px;
+  margin-left: 5px;
+}
+
+.login-btn {
+  margin-top: 20px;
+  width: 100%;
+  background: #07c160;
+  height: 36px;
+  font-size: 16px;
+}
+
+.bottom-link {
+  text-align: right;
+}
+
+.email-select {
+  width: 250px;
+}
+
+.loading-panel {
+  height: calc(100vh - 32px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.loading-panel img {
+  width: 300px;
+}
+
+.login-panel {
+  background: #fff;
+  border-radius: 3px;
+  border: 1px solid #ddd;
+}
+
+.login-panel .title {
+  height: 30px;
+  padding: 5px 0px 0px 10px;
 }
 </style>

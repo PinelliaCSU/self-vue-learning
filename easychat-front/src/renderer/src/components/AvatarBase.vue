@@ -17,11 +17,10 @@ const avatarInfoStore = useAvatarInfoStore();
 const props = defineProps({
   userId: {
     type: String,
-    default: ""
   },
   width: {
     type: Number,
-    default: 170
+    default: 40
   },
   borderRadius: {
     type: Number,

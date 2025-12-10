@@ -5,11 +5,11 @@ import icon from '../../resources/favicon.ico?asset'
 const NOODE_ENV = process.env.NODE_ENV;
 import store from './store';
 
-import {initWs} from './wsClient'
-import  {addUserSetting , selectSettingInfo, updateContactNoReadCount} from './db/UserSettingModel'
+import {initWs , closeWs} from './wsClient'
+import {addUserSetting , selectSettingInfo, updateContactNoReadCount} from './db/UserSettingModel'
 import { selectUserSessionList, delChatSession ,topChatSession, updateSessionInfo4Message ,readAll} from './db/ChatSessionUserModel';
 import { saveMessage, selectMessageList , updateMessage } from './db/ChatMessageModel';
-import { saveFile2Local , createCover , saveAs , saveClipBoardFile} from './db/file';
+import { saveFile2Local , createCover , saveAs , saveClipBoardFile , closeLocalServer} from './db/file';
 import { saveWindow,getWindow,delWindow } from './windowProxy';
 
 
@@ -235,7 +235,14 @@ const onUpdateContactNoReadCount = ()=>{
     })
 }
 
-
+const onReLogin = (callback)=>{
+    ipcMain.on('reLogin', async(e) => {
+        callback();
+        e.sender.send("reLogin")
+        closeWs();
+        closeLocalServer();
+    })
+}
 
 export {
     onLoginOrRegister,
@@ -255,4 +262,5 @@ export {
     onSaveClipBoardFile,
     onLoadContactApply,
     onUpdateContactNoReadCount,
+    onReLogin
 }

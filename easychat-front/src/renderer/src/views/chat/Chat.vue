@@ -95,7 +95,18 @@ const onReceiveMessage = () => {
       loadContactApply();
       return;
     }
-
+    //强制下线
+    if(message.messageType == 7){
+      proxy.confirm({
+        message:`您已被管理员强制下线`,
+        okfun:()=>{
+          setTimeout(()=>{
+            window.ipcRenderer.send("reLogin");
+          },200)
+        },
+        showCancelBtn:false
+      })
+    }
 
     if (message.messageType == 6) {
       const localMessage = messageList.value.find(item => item.messageId == message.messageId);
@@ -350,13 +361,13 @@ const onContextMenu = (data, e) => {
 
       {
         label: data.topType == 0 ? "置顶" : "取消置顶",
-        onclick: () => {
+        onClick: () => {
           setTop(data);
         }
       },
       {
         label: "删除",
-        onclick: () => {
+        onClick: () => {
           proxy.confirm(
             {
               message: `确认删除该聊天【${data.contactName}吗？】`,

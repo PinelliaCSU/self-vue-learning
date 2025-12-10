@@ -9,16 +9,17 @@ import { onLoginOrRegister , onLoginSuccess, winTitleOp ,onSetLocalStore ,
   onGetLocalStore , onLoadSessionData , onDelChatSession , onTopChatSession,
   onLoadChatMessage , onAddLocalMessage ,onSetSessionSelect , onCreateCover,
   onOpenNewWindow , onSaveAs,
-  onSaveClipBoardFile ,onLoadContactApply , onUpdateContactNoReadCount
+  onSaveClipBoardFile ,onLoadContactApply , onUpdateContactNoReadCount,
+  onReLogin
 } from './ipc';
 
 import { saveWindow } from './windowProxy';
 
-const login_width = 350
-const login_height = 600
+const login_width = 300
+const login_height = 370
 
-const register_width = 400
-const register_height = 720
+const register_width = 300
+const register_height = 490
 
 function createWindow() {
   // Create the browser window.
@@ -31,7 +32,7 @@ function createWindow() {
     titleBarStyle: 'hidden',
     resizable: false,
     frame:true,
-    //transparent: true,
+    transparent: true,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
@@ -159,6 +160,13 @@ function createWindow() {
   onSaveClipBoardFile();
   onLoadContactApply();
   onUpdateContactNoReadCount();
+  onReLogin(()=>{
+    mainWindow.setResizable(true)
+    mainWindow.setMaximumSize(login_width,login_height)
+    mainWindow.setSize(login_width,login_height)
+    mainWindow.center()//居中显示
+    mainWindow.setResizable(false)
+  });
 }
 
 // This method will be called when Electron has finished

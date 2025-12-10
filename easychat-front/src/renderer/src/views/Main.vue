@@ -55,7 +55,7 @@ import { useSysSettingStore } from "@/stores/SysSettingStore";
 const sysSettingStore = useSysSettingStore();
 
 import { useMessageCountStore } from '@/stores/MessageCountStore';
-import Badge from '../../components/Badge.vue';
+import Badge from '@/components/Badge.vue';
 const messageCountStore = useMessageCountStore();
 
 
@@ -117,6 +117,10 @@ onMounted(()=>{
   getLoginInfo();
   window.ipcRenderer.on("getLocalStoreCallback",(e,serverPort)=>{
     globalInfoStore.setInfo("localServerPort",serverPort);
+  })
+
+  window.ipcRenderer.on("reLogin",(e)=>{
+    router.push("/login");
   })
 })
 

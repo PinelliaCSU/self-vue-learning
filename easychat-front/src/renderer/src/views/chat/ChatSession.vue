@@ -57,6 +57,13 @@ const props = defineProps({
         padding: 1px 2px 1px 1px;
         border-radius: 0px 3px 3px 0px;
         line-height: 12px;
+        &:hover {
+            cursor: pointer;
+            background: #d8d8d7;
+            .message-time {
+                color: #9a9898!important;
+            }
+        }
     }
     
     .user-info {
@@ -105,16 +112,7 @@ const props = defineProps({
         font-size: 12px;
         color: #8f8f8f;
     }
-    
-    &:hover {
-        cursor: pointer;
-        background: #d8d8d7;
         
-        .message-time {
-            color: #9a9898 !important;
-        }
-    }
-    
     &.active {
         cursor: pointer;
         background: #c9c8c6;
