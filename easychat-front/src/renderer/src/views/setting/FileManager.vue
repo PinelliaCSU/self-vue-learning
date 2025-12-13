@@ -4,7 +4,7 @@
       <!--formData.sysSetting需要从主进程中取得 -->
       <el-form-item label="文件管理" prop="" class="file-manage">
         <div class="file-input" :title="formData.sysSetting">{{ formData.sysSetting }}</div>
-        <div class="tips">文件的默认保存位置</div>
+        <div class="tips">文件默认保存位置</div>
       </el-form-item>
       <el-form-item label="" prop="">
         <el-button type="primary" @click="changeFolder">更改</el-button>
@@ -15,7 +15,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, getCurrentInstance, nextTick } from "vue"
+import { ref, reactive, getCurrentInstance, nextTick, onMounted, onUnmounted } from "vue"
 import ContentPanel from "@/components/ContentPanel.vue"
 const { proxy } = getCurrentInstance();
 
@@ -29,17 +29,40 @@ const rules = {
 
 //TODO 获取文件缓存路径
 
+const getSetting = () => {
+  window.ipcRenderer.send('getSysSetting'); 
+}
+
+onMounted(() => {
+  getSetting();
+  window.ipcRenderer.on('getSysSettingCallback', (e, sysSetting) => {
+    copying.value = false;
+    sysSetting = JSON.parse(sysSetting);
+    formData.value = {
+      sysSetting: sysSetting.localFileFolder,
+    }
+  });
+  window.ipcRenderer.on('copyingCallback', (e) => {
+    copying.value = true;
+  });
+})
+
+onUnmounted(() => {
+  window.ipcRenderer.removeAllListeners('getSysSettingCallback');
+})
+
+
 const changeFolder = () => {
-  
+  window.ipcRenderer.send("changeLocalFolder", formData.value.sysSetting);
 }
 
 const openLocalFolder = ()=>{
-  
+  window.ipcRenderer.send("openLocalFolder", formData.value.sysSetting);
 }
 </script>
 
 <style lang="scss" scoped>
-file-manage {
+.file-manage {
     :deep(.el-form-item_content) {
         display: block;
     }

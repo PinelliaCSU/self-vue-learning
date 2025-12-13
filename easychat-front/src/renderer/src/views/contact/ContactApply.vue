@@ -37,8 +37,11 @@ import { ref, reactive, getCurrentInstance, nextTick } from "vue"
 const { proxy } = getCurrentInstance();
 
 import { useContactStateStore } from '@/stores/ContactStateStore'
+import { watch } from "original-fs";
 const contactStateStore = useContactStateStore();
 
+import { useMessageCountStore } from "../../stores/MessageCountStore";
+const messageCountStore = useMessageCountStore();
 
 let pageNo = 0
 let pageTotal = 1
@@ -96,7 +99,17 @@ const dealWithApply = (applyId, contactType, status) => {
   )
 }
 
-//TODO 监听新朋友的数量，实现数据的实时更新
+// 监听新朋友的数量，实现数据的实时更新
+watch(()=> messageCountStore.messageCount.contactApplyCount, (newValue, oldValue)=> {
+  if (newValue != oldValue) {
+    pageNo = 1;
+    loadApply()
+  }},
+  {
+    immediate: true,
+    deep: true
+  }
+)
 </script>
 
 <style lang="scss" scoped>

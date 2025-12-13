@@ -10,7 +10,9 @@ import { onLoginOrRegister , onLoginSuccess, winTitleOp ,onSetLocalStore ,
   onLoadChatMessage , onAddLocalMessage ,onSetSessionSelect , onCreateCover,
   onOpenNewWindow , onSaveAs,
   onSaveClipBoardFile ,onLoadContactApply , onUpdateContactNoReadCount,
-  onReLogin
+  onReLogin , onOpenLocalFolder , onGetSysSetting,
+  onChangeLocalFolder,
+  onReloadChatSession
 } from './ipc';
 
 import { saveWindow } from './windowProxy';
@@ -167,6 +169,10 @@ function createWindow() {
     mainWindow.center()//居中显示
     mainWindow.setResizable(false)
   });
+  onOpenLocalFolder();
+  onGetSysSetting();
+  onChangeLocalFolder();
+  onReloadChatSession();
 }
 
 // This method will be called when Electron has finished

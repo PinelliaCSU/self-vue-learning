@@ -96,9 +96,16 @@ const delContact = ()=>{
 
 const delContactData = () =>{
     contactStateStore.setContactReload('REMOVE_USER')
-    contactStateStore.delContact(userInfo.value.userId)
 }
-
+const sendMessage = ()=>{
+    router.push({
+      path: "/chat",
+      query: {
+        chatId: userInfo.value.userId,
+        timestamp: new Date().getTime(),
+      }
+    })
+}
 
 watch(
     ()=> route.query.contactId,

@@ -84,8 +84,19 @@ const selectSettingInfo = (userId)=>{
     return queryOne(sql, [userId]);
 }
 
+const updateSysSetting = (sysSetting)=>{
+    const data = {
+        sysSetting,
+    }
+    const paramData = {
+        userId: store.getUserId(),
+    }
+    return Update("user_setting", data, paramData);
+}
+
 export{
     updateContactNoReadCount,
     addUserSetting,
-    selectSettingInfo
+    selectSettingInfo,
+    updateSysSetting
 }

@@ -7,9 +7,9 @@ import store from './store';
 
 import {initWs , closeWs} from './wsClient'
 import {addUserSetting , selectSettingInfo, updateContactNoReadCount} from './db/UserSettingModel'
-import { selectUserSessionList, delChatSession ,topChatSession, updateSessionInfo4Message ,readAll} from './db/ChatSessionUserModel';
+import { selectUserSessionList, delChatSession ,topChatSession, updateSessionInfo4Message ,readAll , updateStatus} from './db/ChatSessionUserModel';
 import { saveMessage, selectMessageList , updateMessage } from './db/ChatMessageModel';
-import { saveFile2Local , createCover , saveAs , saveClipBoardFile , closeLocalServer} from './db/file';
+import { saveFile2Local , createCover , saveAs , saveClipBoardFile , closeLocalServer , openLocalFolder , changeLocalFolder} from './db/file';
 import { saveWindow,getWindow,delWindow } from './windowProxy';
 
 
@@ -106,7 +106,7 @@ const onAddLocalMessage = ()=>{
         }
         //更新session
         data.lastReceiveTime = data.sendTime;
-        //TODO 更新会话
+        // 更新会话
         updateSessionInfo4Message(store.getUserData("currentSessionId"),data);
         e.sender.send("addLocalMessageCallback",{status:1 , messageId:data.messageId})
     })
@@ -243,6 +243,32 @@ const onReLogin = (callback)=>{
         closeLocalServer();
     })
 }
+const onOpenLocalFolder = ()=>{
+    ipcMain.on('openLocalFolder', async(e) => {
+        openLocalFolder();
+    })
+}
+const onGetSysSetting = ()=>{
+    ipcMain.on('getSysSetting', async(e) => {
+        let result = await selectSettingInfo(store.getUserId());
+        let sysSetting = result.sysSetting
+        e.sender.send("getSysSettingCallback",sysSetting)
+    })
+}
+
+const onChangeLocalFolder =()=>{
+    ipcMain.on('changeLocalFolder', async(er) => {
+       changeLocalFolder("copyingCallback");
+    })
+}
+
+const onReloadChatSession =()=>{
+    ipcMain.on('reloadChatSession', async(e,{contactId}) => {
+        await updateStatus(contactId)
+        const chatSessionList = await selectUserSessionList();
+        e.sender.send("reloadChatSessionCallback",{contactId,chatSessionList})
+    })
+}
 
 export {
     onLoginOrRegister,
@@ -262,5 +288,9 @@ export {
     onSaveClipBoardFile,
     onLoadContactApply,
     onUpdateContactNoReadCount,
-    onReLogin
+    onReLogin,
+    onOpenLocalFolder,
+    onGetSysSetting,
+    onChangeLocalFolder,
+    onReloadChatSession
 }

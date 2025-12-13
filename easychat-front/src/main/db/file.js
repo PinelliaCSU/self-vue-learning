@@ -11,6 +11,8 @@ const moment = require('moment');
 moment.locale('zh-cn',{}); // 使用中文
 
 import {  selectByMessageId} from '../db/ChatMessageModel';
+import { selectSettingInfo , updateSysSetting} from './UserSettingModel';
+import { getWindow } from '../windowProxy';
 //express服务器
 const express = require('express');
 const expressServer = express();
@@ -308,6 +310,43 @@ const saveClipBoardFile = async(file)=>{
     }
 }
 
+const openLocalFolder = async()=>{
+    let settingInfo = await selectSettingInfo(store.getUserId());
+    const sysSetting = JSON.parse(settingInfo.sysSetting);
+    const localFileFolder = sysSetting.localFileFolder;
+    if(!localFileFolder){
+        mkdirs(localFileFolder);
+    }
+    shell.openPath('file:///' + localFileFolder);
+}
+
+const changeLocalFolder = async()=>{
+    let settingInfo = await selectSettingInfo(store.getUserId());
+    const sysSetting = JSON.parse(settingInfo.sysSetting);
+    const localFileFolder = sysSetting.localFileFolder;
+    const options = {
+        properties: ['openDirectory'],
+        defaultPath: localFileFolder,
+    }
+    let result = await dialog.showOpenDialog(options);
+    if(result.canceled || result.filePaths.length == 0){
+        return;
+    }
+
+    const newFileFolder = result.filePaths[0];
+
+    if(localFileFolder !== newFileFolder + "\\"){
+        const userId = store.getUserId();
+        getWindow("main").webContents.send("copyingCallback");
+        await fse.copy(localFileFolder + "/" + userId,newFileFolder + "/" + userId)
+    }
+    sysSetting.localFileFolder = newFileFolder + "\\";
+    const sysSettingJson = JSON.stringify(sysSetting);
+    await updateSysSetting(sysSettingJson);
+    store.setUserData("localFileFolder",sysSetting.localFileFolder + store.getUserId());
+    getWindow("main").webContents.send("getSysSettingCallback",sysSettingJson);
+}
+
 export {
     saveFile2Local,
     startLocalServer,
@@ -315,4 +354,6 @@ export {
     createCover,
     saveAs,
     saveClipBoardFile,
+    openLocalFolder,
+    changeLocalFolder,
 }

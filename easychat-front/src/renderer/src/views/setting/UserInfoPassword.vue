@@ -64,8 +64,8 @@ const saveUserInfo = () => {
                     return;
                 }
                 proxy.Message.success("修改成功后请重新登录",()=>{
-                    //TODO 重新登录
-                    window.ipcRenderer.send("relogin");
+                    // 重新登录
+                    window.ipcRenderer.send("reLogin");
                 });
                 
                 

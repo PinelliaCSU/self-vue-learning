@@ -61,7 +61,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, getCurrentInstance, nextTick, onMounted, onUnmounted } from "vue"
+import { ref, reactive, getCurrentInstance, nextTick, onMounted, onUnmounted ,watch} from "vue"
 import Layout from "../../components/layout.vue";
 import MessageSend from "./MessageSend.vue";
 const { proxy } = getCurrentInstance();
@@ -85,6 +85,9 @@ const search = () => {
 
 }
 
+import { useRoute, useRouter } from 'vue-router'
+const route = useRoute();
+
 const chatSessionList = ref([]);
 
 const onReceiveMessage = () => {
@@ -107,7 +110,12 @@ const onReceiveMessage = () => {
         showCancelBtn:false
       })
     }
-
+    //更新群昵称
+    if(message.messageType == 10){
+      let curSession = chatSessionList.value.find(item => item.contactId == message.contactId);
+      curSession.contactName = message.extendData
+      return;
+    }
     if (message.messageType == 6) {
       const localMessage = messageList.value.find(item => item.messageId == message.messageId);
       if (localMessage != null) {
@@ -304,6 +312,14 @@ const onLoadContactApply = ()=>{
   })
 }
 
+const onReloadChatSession = ()=>{
+  window.ipcRenderer.on('reloadChatSessionCallback', (e, {contactId,chatSessionList})=>{
+    sortChatSessionList(chatSessionList);
+    chatSessionList.value = chatSessionList;
+    sendMessage(contactId);
+  })
+}
+
 
 onMounted(() => {
   onLoadContactApply();
@@ -315,7 +331,7 @@ onMounted(() => {
 
 //获取未读好友申请数量
   loadContactApply();
-
+  onReloadChatSession();
   nextTick(() => {
     const messagePanel = document.querySelector("#message-panel");
     messagePanel.addEventListener("scroll", (e) => {
@@ -329,12 +345,16 @@ onMounted(() => {
   })
   setSessionSelect({});
 })
+
+
+
 onUnmounted(() => {
-  window.ipcRenderer.removeAllListeners('receiveMessage');
   window.ipcRenderer.removeAllListeners('loadSessionDataCallback');
+  window.ipcRenderer.removeAllListeners('receiveMessage');
   window.ipcRenderer.removeAllListeners('loadChatMessage');
   window.ipcRenderer.removeAllListeners('addLocalMessage');
   window.ipcRenderer.removeAllListeners('loadContactApplyCallback');
+  window.ipcRenderer.removeAllListeners('reloadChatSessionCallback');
 })
 
 const setTop = (data) => {
@@ -347,7 +367,7 @@ const setTop = (data) => {
 const delChatSession = (contactId,) => {
   delChatSessionList(contactId);
   currentChatSession.value = {};
-  //TODO 设置选中的会话
+  //设置选中的会话
   window.ipcRenderer.send('delChatSession', contactId)
 }
 
@@ -411,6 +431,25 @@ const chatGroupDetailRef = ref();
 const showGroupDetail =()=>{
   chatGroupDetailRef.value.show(currentChatSession.value.contactId)
 }
+
+const sendMessage =(contactId)=>{
+  let curSession = chatSessionList.value.find(item => item.contactId == contactId);
+  if(!curSession){//可能删掉了
+      window.ipcRenderer.send('reloadChatSession',{contactId})
+      return;
+  }else{
+      chatSessionClickHandler(curSession);
+  }
+}
+
+watch(() => route.query.timestamp,
+ (newVal, oldVal) => {
+  if(newVal && route.query.chatId){
+    sendMessage(route.query.chatId)
+  }
+ }, 
+ { immediate: true, deep: true }
+ );
 </script>
 
 <style lang="scss" scoped>

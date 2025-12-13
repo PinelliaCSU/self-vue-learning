@@ -70,8 +70,20 @@ const editBack = ()=>{
 }
 
 //退出登录
-const logout = async()=>{
-  
+const logout = ()=>{
+  proxy.confirm({
+    message: "确定退出登录吗？",
+    onOk: async()=>{
+       // 重新登录
+      window.ipcRenderer.send("reLogin");  
+      let result = await proxy.Request({
+        url: proxy.Api.logout,
+      })
+      if(!result){
+        return;
+      }
+    }
+  })
 }
 </script>
 

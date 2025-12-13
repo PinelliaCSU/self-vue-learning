@@ -61,7 +61,7 @@ const updateNoReadCount = (contactId, noReadCount)=>{
 }
 
 const selectUserSessionList = ()=>{
-    let sql = `select * from chat_session_user where user_id =? and status =1`;
+    let sql = `select * from chat_session_user where user_id = ? and status = 1`;
     return queryAll(sql, [store.getUserId()]);
 }
 //更新数据库
@@ -140,6 +140,19 @@ const updateGroupName = (contactId,groupName)=>{
     return Update("chat_session_user", sessionInfo, paramData);
 }
 
+
+const updateStatus = (contactId)=>{
+    const paramData = {
+        userId : store.getUserId(),
+        contactId : contactId,
+    }
+
+    const sessionInfo = {
+        status : 1,
+    }
+
+    return Update("chat_session_user", sessionInfo, paramData);
+}
 export{
     saveOrUpdateChatSession4Batch,
     updateNoReadCount,
@@ -150,5 +163,6 @@ export{
     updateSessionInfo4Message,
     readAll,
     saveOrUpdate4Message,
-    updateGroupName
+    updateGroupName,
+    updateStatus
 }

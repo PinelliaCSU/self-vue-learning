@@ -36,7 +36,7 @@
         </template>
     </el-popover>
   </div>
-
+  <SearchAdd ref="searchAddRef"></SearchAdd>
 </template>
 
 <script setup>
@@ -49,6 +49,7 @@ const { proxy } = getCurrentInstance();
 import {useUserInfoStore} from '@/stores/UserInfoStore.js';
 const userInfoStore = useUserInfoStore();
 
+import SearchAdd from '../views/contact/SearchAdd.vue';
 const props = defineProps({
   userId: {
     type: String,
@@ -63,6 +64,10 @@ const props = defineProps({
   },
   groupId:{
     type: String,
+  },
+  showDetail: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -87,11 +92,29 @@ const getUserInfo = async()=>{
     }
 }
 
+
+const emit = defineEmits(['closeDrawer']);
 const sendMessage = ()=>{
-    //TODO 发送消息
+    // 发送消息
+    popoverRef.value.hide();
+    emit('closeDrawer')
+    router.push({
+      path: "/chat",
+      query: {
+        chatId: props.userId,
+        timestamp: new Date().getTime(),
+      }
+    })
 }
+
+const searchAddRef = ref();
 const addContact  =()=>{
-    //TODO 添加联系人
+    // 添加联系人
+    popoverRef.value.hide();
+    searchAddRef.value.show({
+      contactId: props.userId,
+      contactType: "USER",
+    });
 }
 
 </script>

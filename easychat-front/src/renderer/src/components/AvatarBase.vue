@@ -14,6 +14,8 @@ const { proxy } = getCurrentInstance();
 import { useAvatarInfoStore } from '../stores/AvatarUpdateStore';
 const avatarInfoStore = useAvatarInfoStore();
 
+
+
 const props = defineProps({
   userId: {
     type: String,
@@ -37,7 +39,21 @@ const showDetailHandler = () => {
   if (!props.showDetail) {
     return
   }
-  //TODO 显示详情
+  //查看图片详情
+  window.ipcRenderer.send('newWindow', {
+    windowId: "media",
+    title: "图片查看",
+    path: "/showMedia",
+    data: {
+      fileList: [{
+        fileId: props.userId,
+        fileType:0,
+        partType: "avatar",
+        status: 1,
+        forceGet : true
+      }],
+    }
+  })
 }
 
 </script>
