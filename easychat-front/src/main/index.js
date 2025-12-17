@@ -14,7 +14,8 @@ import { onLoginOrRegister , onLoginSuccess, winTitleOp ,onSetLocalStore ,
   onChangeLocalFolder,
   onReloadChatSession,
   onOpenUrl,
-  onDownloadUpdate
+  onDownloadUpdate,
+  onLoadLocalUser
 } from './ipc';
 
 import { saveWindow } from './windowProxy';
@@ -177,6 +178,7 @@ function createWindow() {
   onReloadChatSession();
   onOpenUrl();
   onDownloadUpdate();
+  onLoadLocalUser();
 }
 
 // This method will be called when Electron has finished

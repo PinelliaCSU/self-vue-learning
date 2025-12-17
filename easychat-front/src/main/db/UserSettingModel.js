@@ -94,9 +94,16 @@ const updateSysSetting = (sysSetting)=>{
     return Update("user_setting", data, paramData);
 }
 
+
+
+const loadLocalUser = ()=>{
+    let sql = "select email from user_setting where email is not null"
+    return queryAll(sql, []);
+}
 export{
     updateContactNoReadCount,
     addUserSetting,
     selectSettingInfo,
-    updateSysSetting
+    updateSysSetting,
+    loadLocalUser
 }

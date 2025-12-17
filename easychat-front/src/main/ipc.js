@@ -6,7 +6,7 @@ const NOODE_ENV = process.env.NODE_ENV;
 import store from './store';
 
 import {initWs , closeWs} from './wsClient'
-import {addUserSetting , selectSettingInfo, updateContactNoReadCount} from './db/UserSettingModel'
+import {addUserSetting , selectSettingInfo, updateContactNoReadCount ,loadLocalUser} from './db/UserSettingModel'
 import { selectUserSessionList, delChatSession ,topChatSession, updateSessionInfo4Message ,readAll , updateStatus} from './db/ChatSessionUserModel';
 import { saveMessage, selectMessageList , updateMessage } from './db/ChatMessageModel';
 import { saveFile2Local , createCover , saveAs , saveClipBoardFile , closeLocalServer , openLocalFolder , changeLocalFolder , downloadUpdate} from './db/file';
@@ -282,6 +282,13 @@ const onDownloadUpdate = ()=>{
     })
 }
 
+const onLoadLocalUser = ()=>{
+    ipcMain.on('loadLocalUser', async(e) => {
+        let userList = await loadLocalUser();
+        e.sender.send("loadLocalUserCallback",userList)
+    })
+}
+
 export {
     onLoginOrRegister,
     onLoginSuccess,
@@ -307,4 +314,5 @@ export {
     onReloadChatSession,
     onOpenUrl,
     onDownloadUpdate,
+    onLoadLocalUser,
 }

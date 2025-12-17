@@ -11,13 +11,27 @@
       <el-form :model="formData" :rules="rules" ref="formDataRef" label-width="0px" @submit.prevent>
 
         <el-form-item prop="email">
-          <el-input size="large" clearable placeholder="请输入邮箱" maxLength="30" v-model.trim="formData.email"
-            @focus="clearVerify">
-            <template #prefix>
-              <span class="iconfont icon-email"></span>
-            </template>
-          </el-input>
+          <div class="email-panel">
+            <el-input size="large" clearable placeholder="请输入邮箱" maxLength="30"
+              v-model.trim="formData.email" @focus="clearVerify">
+              <template #prefix>
+                <span class="iconfont icon-email"></span>
+              </template>
+            </el-input>
+            <el-dropdown v-if="isLogin && localUserList.length > 0" trigger="click">
+              <span class="iconfont icon-down"></span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item v-for="item in localUserList" :key="item.email" @click="selectEmail(item)">
+                    {{ item.email }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
         </el-form-item>
+
+
 
         <el-form-item prop="nickName" v-if="!isLogin">
           <el-input size="large" clearable placeholder="请输入昵称" maxLength="15" v-model.trim="formData.nickName"
@@ -74,7 +88,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, getCurrentInstance, nextTick, onMounted } from "vue"
+import { ref, reactive, getCurrentInstance, nextTick, onMounted, onUnmounted } from "vue"
 const { proxy } = getCurrentInstance();
 
 import md5 from 'js-md5'
@@ -208,11 +222,29 @@ const init = () => {
   window.ipcRenderer.send("setLocalStore", { key: 'devDomain', value: proxy.Api.devDomain })
   window.ipcRenderer.send("setLocalStore", { key: 'devMsDomain', value: proxy.Api.devMsDomain })
   window.ipcRenderer.send("setLocalStore", { key: 'prodMsDomain', value: proxy.Api.prodMsDomain })
+
+  window.ipcRenderer.send('loadLocalUser')
+
+  window.ipcRenderer.on('loadLocalUserCallback', (e, userList) => {
+    localUserList.value = userList;
+  })
 }
 
 onMounted(() => {
   init()
 })
+
+
+onUnmounted(() => {
+  window.ipcRenderer.removeAllListeners('loadLocalUserCallback')
+})
+//本地用户列表
+const localUserList = ref([])
+
+
+const selectEmail = (item) => {
+  formData.value.email = item.email;
+}
 
 const checkValue = (type, value, msg) => {
   if (proxy.Utils.isEmpty(value)) {
@@ -258,7 +290,7 @@ const clearVerify = () => {
 
 .login-form {
   padding: 0px 15px 29px 15px;
-  
+
   :deep(.el-form-item__wrapper) {
     box-shadow: none;
     border-radius: none;
