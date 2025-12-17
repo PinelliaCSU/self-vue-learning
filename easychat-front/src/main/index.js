@@ -167,7 +167,7 @@ function createWindow() {
   onUpdateContactNoReadCount();
   onReLogin(()=>{
     mainWindow.setResizable(true)
-    mainWindow.setMaximumSize(login_width,login_height)
+    mainWindow.setMinimumSize(login_width,login_height)
     mainWindow.setSize(login_width,login_height)
     mainWindow.center()//居中显示
     mainWindow.setResizable(false)

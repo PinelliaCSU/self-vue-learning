@@ -26,7 +26,7 @@ const props = defineProps({
     },
     showArea: {
         type: Boolean,
-        default: false
+        default: true
     }
 })
 

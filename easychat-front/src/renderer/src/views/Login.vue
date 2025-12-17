@@ -1,5 +1,5 @@
 <template>
-  <WinOp :showSetTop="false" :show-min="false" :showMax="false" :closeType="0"></WinOp>
+  <WinOp :showSetTop="false" :show-min="false" :showMax="false" :closeType="0" @closeCallback="handleClose"></WinOp>
   <div class="login-panel">
     <div class="title drag">EasyChat</div>
     <div v-if="showLoading" class="loading-panel">
@@ -12,8 +12,8 @@
 
         <el-form-item prop="email">
           <div class="email-panel">
-            <el-input size="large" clearable placeholder="请输入邮箱" maxLength="30"
-              v-model.trim="formData.email" @focus="clearVerify">
+            <el-input size="large" clearable placeholder="请输入邮箱" maxLength="30" v-model.trim="formData.email"
+              @focus="clearVerify">
               <template #prefix>
                 <span class="iconfont icon-email"></span>
               </template>
@@ -30,8 +30,6 @@
             </el-dropdown>
           </div>
         </el-form-item>
-
-
 
         <el-form-item prop="nickName" v-if="!isLogin">
           <el-input size="large" clearable placeholder="请输入昵称" maxLength="15" v-model.trim="formData.nickName"
@@ -262,6 +260,10 @@ const clearVerify = () => {
   errorMsg.value = null
 }
 
+const handleClose = () => {
+  window.ipcRenderer.send('winTitleOp', {action: 'close', data: {closeType: 0}});
+}
+
 </script>
 
 <style lang="scss" scoped>
@@ -295,10 +297,53 @@ const clearVerify = () => {
     box-shadow: none;
     border-radius: none;
   }
+
+  :deep(.el-input__wrapper) {
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+  }
+  
+  :deep(.el-input__inner) {
+    border: none !important;
+    outline: none !important;
+  }
 }
 
+
 .el-form-item {
-  border-bottom: 1 px solid #ddd;
+  position: relative;
+  margin-bottom: 20px;
+  
+  // 使用 box-shadow 创建底部线条
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #e0e0e0;
+    z-index: 1;
+  }
+  
+  // 当输入框获得焦点时显示亮线，
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #07c160;
+    z-index: 2;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  &:focus-within::after {
+    transform: scaleX(1);
+  }
 }
 
 .check-code-panel {
@@ -348,5 +393,6 @@ const clearVerify = () => {
 .login-panel .title {
   height: 30px;
   padding: 5px 0px 0px 10px;
+  
 }
 </style>
