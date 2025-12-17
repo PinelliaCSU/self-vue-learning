@@ -9,7 +9,7 @@ import {initWs , closeWs} from './wsClient'
 import {addUserSetting , selectSettingInfo, updateContactNoReadCount} from './db/UserSettingModel'
 import { selectUserSessionList, delChatSession ,topChatSession, updateSessionInfo4Message ,readAll , updateStatus} from './db/ChatSessionUserModel';
 import { saveMessage, selectMessageList , updateMessage } from './db/ChatMessageModel';
-import { saveFile2Local , createCover , saveAs , saveClipBoardFile , closeLocalServer , openLocalFolder , changeLocalFolder} from './db/file';
+import { saveFile2Local , createCover , saveAs , saveClipBoardFile , closeLocalServer , openLocalFolder , changeLocalFolder , downloadUpdate} from './db/file';
 import { saveWindow,getWindow,delWindow } from './windowProxy';
 
 
@@ -270,6 +270,18 @@ const onReloadChatSession =()=>{
     })
 }
 
+const onOpenUrl = ()=>{
+   ipcMain.on('openUrl', async(e,{url}) => {
+        shell.openExternal(url)
+    })
+}
+
+const onDownloadUpdate = ()=>{
+   ipcMain.on('downloadUpdate', async(e,{id,fileName}) => {
+        downloadUpdate(id,fileName);
+    })
+}
+
 export {
     onLoginOrRegister,
     onLoginSuccess,
@@ -292,5 +304,7 @@ export {
     onOpenLocalFolder,
     onGetSysSetting,
     onChangeLocalFolder,
-    onReloadChatSession
+    onReloadChatSession,
+    onOpenUrl,
+    onDownloadUpdate,
 }

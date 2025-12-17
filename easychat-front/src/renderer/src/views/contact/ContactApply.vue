@@ -33,11 +33,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, getCurrentInstance, nextTick } from "vue"
+import { ref, reactive, getCurrentInstance, nextTick ,watch} from "vue"
 const { proxy } = getCurrentInstance();
 
 import { useContactStateStore } from '@/stores/ContactStateStore'
-import { watch } from "original-fs";
 const contactStateStore = useContactStateStore();
 
 import { useMessageCountStore } from "../../stores/MessageCountStore";

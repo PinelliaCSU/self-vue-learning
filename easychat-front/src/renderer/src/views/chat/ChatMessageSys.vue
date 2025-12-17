@@ -1,5 +1,5 @@
 <template>
-    <chatMessageTime :data="data"></chatMessageTime>
+    <ChatMessageTime :data="data"></ChatMessageTime>
     <div class="sys-message">
         {{ dataMessage.messageContent }}
     </div>
@@ -8,7 +8,7 @@
 <script setup>
 import { ref, reactive, getCurrentInstance, nextTick, computed } from "vue"
 const { proxy } = getCurrentInstance();
-import chatMessageTime from "./ChatMessageTime.vue";
+import ChatMessageTime from "./ChatMessageTime.vue";
 
 
 const props = defineProps({

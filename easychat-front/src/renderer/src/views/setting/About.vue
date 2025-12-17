@@ -10,16 +10,21 @@
       </div>
     </el-form-item>
   </ContentPanel>
+  <Update :autoUpdate="false" ref="updateRef"></Update>
 </template>
 
 <script setup>
+
+import Update from "../Update.vue";  
 import config from "../../../../../package.json"
 import { ref, reactive, getCurrentInstance, nextTick } from "vue"
 const { proxy } = getCurrentInstance();
 
-//TODO 检测更新
-const checkUpdate =()=>{
+// 检测更新
 
+const updateRef = ref();
+const checkUpdate =()=>{
+  updateRef.value.checkUpdate()
 }
 </script>
 

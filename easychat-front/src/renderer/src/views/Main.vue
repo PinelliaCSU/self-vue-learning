@@ -35,15 +35,17 @@
     </div>
   </div>
   <WinOp></WinOp> <!--  窗口操作组件 -->
+  <Update></Update>
 </template>
 
 <script setup>
-import { ref, reactive, getCurrentInstance, nextTick, onMounted } from "vue"
+import { ref, reactive, getCurrentInstance, nextTick, onMounted, watch } from "vue"
 const { proxy } = getCurrentInstance();
 
-import {useRouter} from 'vue-router';
+import {useRouter ,useRoute} from 'vue-router';
 import WinOp from "../components/WinOp.vue";
 const router = useRouter()
+const route = useRoute()
 
 import {useUserInfoStore} from '@/stores/UserInfoStore';
 const userInfoStore = useUserInfoStore();//确保状态管理与组件生命周期正确关联
@@ -56,6 +58,7 @@ const sysSettingStore = useSysSettingStore();
 
 import { useMessageCountStore } from '@/stores/MessageCountStore';
 import Badge from '@/components/Badge.vue';
+import Update from "./Update.vue";
 const messageCountStore = useMessageCountStore();
 
 
@@ -123,6 +126,25 @@ onMounted(()=>{
     router.push("/login");
   })
 })
+
+
+const menuSelect = (path)=>{
+  currentMenu.value = menuList.value.find(
+    (item)=>{
+      return path.includes(item.path)
+    }
+  );
+}
+
+
+watch(() => route.path,
+ (newVal, oldVal) => {
+  if(newVal){
+    menuSelect(newVal)
+  }
+ }, 
+ { immediate: true, deep: true }
+);
 
 </script>
 

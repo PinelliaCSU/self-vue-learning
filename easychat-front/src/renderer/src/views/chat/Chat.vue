@@ -240,21 +240,25 @@ const onLoadChatMessage = () => {
     if (pageNo == totalPage) {
       messageCountInfo.noData = true;
     }
+
+  
     //对消息排序
     dataList.sort((a, b) => {
       return a.messageId - b.messageId;
     })
+
     const lastMessage = messageList.value[0]
     messageList.value = dataList.concat(messageList.value);
     messageCountInfo.pageNo = pageNo;
     messageCountInfo.totalPage = totalPage;
+    
     if (pageNo == 1) {
       messageCountInfo.maxMessageId = dataList.length > 0 ? dataList[dataList.length - 1].messageId : null;
       //滚动条滚动到最底部
       gotoBottom()
     } else {
       nextTick(() => {
-        document.querySelector("#message" + lastMessage.messageId).scrollIntoView({ behavior: "smooth" })
+        document.querySelector("#message" + lastMessage.messageId).scrollIntoView()
       })
     }
 

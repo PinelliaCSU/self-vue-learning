@@ -12,7 +12,9 @@ import { onLoginOrRegister , onLoginSuccess, winTitleOp ,onSetLocalStore ,
   onSaveClipBoardFile ,onLoadContactApply , onUpdateContactNoReadCount,
   onReLogin , onOpenLocalFolder , onGetSysSetting,
   onChangeLocalFolder,
-  onReloadChatSession
+  onReloadChatSession,
+  onOpenUrl,
+  onDownloadUpdate
 } from './ipc';
 
 import { saveWindow } from './windowProxy';
@@ -173,6 +175,8 @@ function createWindow() {
   onGetSysSetting();
   onChangeLocalFolder();
   onReloadChatSession();
+  onOpenUrl();
+  onDownloadUpdate();
 }
 
 // This method will be called when Electron has finished

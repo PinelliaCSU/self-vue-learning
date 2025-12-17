@@ -347,6 +347,31 @@ const changeLocalFolder = async()=>{
     getWindow("main").webContents.send("getSysSettingCallback",sysSettingJson);
 }
 
+
+const downloadUpdate = async (id, fileName) => {
+    let url = `${store.getData("domain")}/api/update/download`;
+    const token = store.getUserData("token");
+    const config = {
+        responseType: 'stream',
+        headers: { 'Content-Type': 'multipart/form-data', "token": token },
+        onDownloadProgress(progress) {
+            const loaded = progress.loaded;
+            getWindow("main").webContents.send("updateDownloadCallback", loaded);
+        }
+    };
+
+    const response = await axios.post(url, { id }, config);
+    const localFile = await getLocalFilePath(null, false, fileName);
+    const stream = fs.createWriteStream(localFile);
+    response.data.pipe(stream);
+    stream.on('finish', async () => {
+        stream.close();
+        //开始安装
+        const command = `${localFile}`;
+        execCommand(command);
+    });
+};
+
 export {
     saveFile2Local,
     startLocalServer,
@@ -356,4 +381,5 @@ export {
     saveClipBoardFile,
     openLocalFolder,
     changeLocalFolder,
+    downloadUpdate
 }
