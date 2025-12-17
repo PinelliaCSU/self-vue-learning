@@ -9,7 +9,7 @@
             </template>
           </el-input>
       </div>
-      <div class="contact-list">
+      <div class="contact-list" v-show="!searchKey">
         <template v-for="item in partList">
           <div class="part-title">{{item.partName}}</div>
           <div class="part-list">
@@ -32,6 +32,9 @@
             </template>
           </div>
         </template>
+      </div>
+      <div class="search-list" v-if="searchKey">
+        <ContactSearchResult :data="item" v-for="item in searchList" @click="searchClickHandler(item)"></ContactSearchResult>
       </div>
     </template>
     <template #right-content>
@@ -61,13 +64,8 @@ import { useMessageCountStore } from '@/stores/MessageCountStore';
 import Badge from '../../components/Badge.vue';
 const messageCountStore = useMessageCountStore();
 
-const searchKey = ref();
-const search = ()=>{
-  
-}
 
-
-
+import ContactSearchResult from './ContactSearchResult.vue';
 const partList = ref([
  {
     partName: '新朋友',
@@ -181,6 +179,50 @@ const contactDetail = (contact,item)=>{
   router.push({path:item.contactPath,query:{contactId:contact[item.contactId]}})
 }
 
+
+const searchKey = ref();
+const searchList = ref([]);
+const search = ()=>{
+   if(!searchKey.value){
+    return
+  }
+  searchList.value = [];
+  const ragex = new RegExp("(" + searchKey.value + ")", "gi");
+  let allContactList = []
+  partList.value.forEach(item=>{
+    if(item.contactData){
+      allContactList = allContactList.concat(item.contactData);
+    }
+  })
+
+
+   allContactList.forEach(item => {
+    let contactName = item.groupName ? item.groupName : item.contactName;
+    if(contactName.includes(searchKey.value)){
+      let newData = Object.assign({},item);
+
+      newData.searchContactName = newData.contactName.replace(
+        ragex, "<span class='highlight'>$1</span>");
+
+      newData.contactId = item.groupId || item.contactId;
+      searchList.value.push(newData)
+    }
+    
+  })
+}
+
+
+const searchClickHandler = (data)=>{
+  searchKey.value = undefined;
+  router.push({
+    path:'/chat',
+    query:{
+      chatId: data.contactId,
+      timestamp: new Date().getTime(),
+    }
+  })
+
+}
 
 //监听contactStateStore.contactReload状态的变化，
 //这是一个从状态管理store中获取的值

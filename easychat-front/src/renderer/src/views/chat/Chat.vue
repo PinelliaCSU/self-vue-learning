@@ -9,13 +9,16 @@
           </template>
         </el-input>
       </div>
-      <div class="chat-session-list">
+      <div class="chat-session-list" v-if="!searchKey">
         <template v-for="item in chatSessionList">
           <ChatSession :data="item" @click="chatSessionClickHandler(item)"
             @contextmenu.stop="onContextMenu(item, $event)"
             :currentSession="item.contactId == (currentChatSession?.contactId || '')">
           </ChatSession>
         </template>
+      </div>
+      <div class="search-list" v-if="searchKey">
+        <SearchResult :data="item" v-for="item in searchList" @click="searchClickHandler(item)"></SearchResult>
       </div>
     </template>
     <template #right-content>
@@ -80,10 +83,7 @@ import ChatGroupDetail from "./ChatGroupDetail.vue";
 import { useMessageCountStore } from "../../stores/MessageCountStore";
 const messageCountStore = useMessageCountStore();
 
-const searchKey = ref();
-const search = () => {
-
-}
+import SearchResult from "./SearchResult.vue";
 
 import { useRoute, useRouter } from 'vue-router'
 const route = useRoute();
@@ -325,6 +325,8 @@ const onReloadChatSession = ()=>{
 }
 
 
+
+
 onMounted(() => {
   onLoadContactApply();
   onReceiveMessage();
@@ -454,6 +456,36 @@ watch(() => route.query.timestamp,
  }, 
  { immediate: true, deep: true }
  );
+
+
+const searchKey = ref();
+const searchList = ref([]);//搜索查询的结果集
+const search = () => {
+  if(!searchKey.value){
+    return
+  }
+  searchList.value = [];
+  const ragex = new RegExp("(" + searchKey.value + ")", "gi");
+  chatSessionList.value.forEach(item => {
+    if(item.contactName.includes(searchKey.value) || item.lastMessage.includes(searchKey.value)){
+      let newData = Object.assign({},item);
+
+      newData.searchContactName = newData.contactName.replace(
+        ragex, "<span class='highlight'>$1</span>");
+
+      newData.searchLastMessage = newData.lastMessage.replace(
+        ragex, "<span class='highlight'>$1</span>");
+      searchList.value.push(newData)
+    }
+    
+  })
+}
+
+const searchClickHandler = (data)=>{
+  chatSessionClickHandler(data);
+  searchKey.value = undefined;
+}
+
 </script>
 
 <style lang="scss" scoped>
