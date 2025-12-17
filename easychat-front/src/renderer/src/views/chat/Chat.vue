@@ -63,6 +63,12 @@
   <ChatGroupDetail ref="chatGroupDetailRef" @delChatSessionCallback="delChatSession"></ChatGroupDetail>
 </template>
 
+<script>
+  export default {
+    name: "chat",
+  }
+</script>
+
 <script setup>
 import { ref, reactive, getCurrentInstance, nextTick, onMounted, onUnmounted ,watch} from "vue"
 import Layout from "../../components/layout.vue";
@@ -109,6 +115,7 @@ const onReceiveMessage = () => {
         },
         showCancelBtn:false
       })
+      return;
     }
     //更新群昵称
     if(message.messageType == 10){
@@ -372,6 +379,7 @@ const setTop = (data) => {
 
 const delChatSession = (contactId,) => {
   delChatSessionList(contactId);
+  setSessionSelect({})//删除之后，清空选中的会话，否则系统会以为选中的还是之前的会话
   currentChatSession.value = {};
   //设置选中的会话
   window.ipcRenderer.send('delChatSession', contactId)

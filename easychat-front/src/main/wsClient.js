@@ -47,6 +47,7 @@ const createWs = ()=>{
     ws.onmessage = async function(e){
         console.log("收到了服务端的消息",e.data)
         const message = JSON.parse(e.data);
+        const leaveGroupUserId = message.extendData
         const messageType = message.messageType;
         switch(messageType){
             case 0: //ws连接成功
@@ -104,6 +105,9 @@ const createWs = ()=>{
                 await saveMessage(message);
                 const dbSessionInfo = await selectUserSessionByContactId(message.contactId);
                 message.extendData = dbSessionInfo;
+                if(messageType == 11 && leaveGroupUserId == store.getUserId()){//退出群聊
+                    break;
+                }
                 sender.send("receiveMessage", message);
                 break;
         }

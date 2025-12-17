@@ -92,7 +92,7 @@ const getUserInfo = async()=>{
     }
 }
 
-
+const popoverRef = ref();
 const emit = defineEmits(['closeDrawer']);
 const sendMessage = ()=>{
     // 发送消息
